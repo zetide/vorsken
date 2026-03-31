@@ -1,0 +1,387 @@
+﻿[
+    {
+        "Id":  "CVE-2026-32622",
+        "Score":  8.8,
+        "Severity":  "HIGH",
+        "Description":  "SQLBot is an intelligent data query system based on a large language model and RAG. Versions 1.5.0 and below contain a Stored Prompt Injection vulnerability that chains three flaws: a missing permission check on the Excel upload API allowing any authenticated user to upload malicious terminology, unsanitized storage of terminology descriptions containing dangerous payloads, and a lack of semantic fencing when injecting terminology into the LLM\u0027s system prompt. Together, these flaws allow an attacker to hijack the LLM\u0027s reasoning to generate malicious PostgreSQL commands (e.g., COPY ... TO PROGRAM), ultimately achieving Remote Code Execution on the database or application server with postgres user privileges. The issue is fixed in v1.6.0.",
+        "Refs":  [
+                     "https://github.com/dataease/SQLBot/releases/tag/v1.6.0",
+                     "https://github.com/dataease/SQLBot/security/advisories/GHSA-m7q7-vhw9-q7m3"
+                 ],
+        "NvdUrl":  "https://nvd.nist.gov/vuln/detail/CVE-2026-32622",
+        "Published":  "2026-03-19",
+        "EpssScore":  0.0034,
+        "EpssPercentile":  0.5631,
+        "InCisaKev":  false,
+        "AttentionScore":  42.6,
+        "AttentionLabel":  "MEDIUM"
+    },
+    {
+        "Id":  "CVE-2025-15379",
+        "Score":  10.0,
+        "Severity":  "CRITICAL",
+        "Description":  "A command injection vulnerability exists in MLflow\u0027s model serving container initialization code, specifically in the `_install_model_dependencies_to_env()` function. When deploying a model with `env_manager=LOCAL`, MLflow reads dependency specifications from the model artifact\u0027s `python_env.yaml` file and directly interpolates them into a shell command without sanitization. This allows an attacker to supply a malicious model artifact and achieve arbitrary command execution on systems that deploy the model. The vulnerability affects versions 3.8.0 and is fixed in version 3.8.2.",
+        "Refs":  [
+                     "https://github.com/mlflow/mlflow/commit/361b6f620adf98385c6721e384fb5ef9a30bb05e",
+                     "https://huntr.com/bounties/dc9c1c20-7879-4050-87df-4d095fe5ca75"
+                 ],
+        "NvdUrl":  "https://nvd.nist.gov/vuln/detail/CVE-2025-15379",
+        "Published":  "2026-03-30",
+        "EpssScore":  0.0017,
+        "EpssPercentile":  0.3782,
+        "InCisaKev":  false,
+        "AttentionScore":  32.7,
+        "AttentionLabel":  "MEDIUM"
+    },
+    {
+        "Id":  "CVE-2026-32950",
+        "Score":  8.8,
+        "Severity":  "HIGH",
+        "Description":  "SQLBot is an intelligent data query system based on a large language model and RAG. Versions prior to 1.7.0 contain a critical SQL Injection vulnerability in the /api/v1/datasource/uploadExcel endpoint that enables Remote Code Execution (RCE), allowing any authenticated user (even the lowest-privileged) to fully compromise the backend server. The root cause is twofold: Excel Sheet names are concatenated directly into PostgreSQL table names without sanitization (datasource.py#L351), and those table names are embedded into COPY SQL statements via f-strings instead of parameterized queries (datasource.py#L385-L388). An attacker can bypass the 31-character Sheet name limit using a two-stage techniqueâfirst uploading a normal file whose data rows contain shell commands, then uploading an XML-tampered file whose Sheet name injects a TO PROGRAM \u0027sh\u0027 clause into the SQL. Confirmed impacts include arbitrary command execution as the postgres user (uid=999), sensitive file exfiltration (e.g., /etc/passwd, /etc/shadow), and complete PostgreSQL database takeover. This issue has been fixed in version 1.7.0.",
+        "Refs":  [
+                     "https://github.com/dataease/SQLBot/commit/39f2203cec4bb4b0aa541710733fe7608e3d3c48",
+                     "https://github.com/dataease/SQLBot/releases/tag/v1.7.0",
+                     "https://github.com/dataease/SQLBot/security/advisories/GHSA-7hww-8rj5-7rmm"
+                 ],
+        "NvdUrl":  "https://nvd.nist.gov/vuln/detail/CVE-2026-32950",
+        "Published":  "2026-03-20",
+        "EpssScore":  0.0018,
+        "EpssPercentile":  0.3951,
+        "InCisaKev":  false,
+        "AttentionScore":  32.5,
+        "AttentionLabel":  "MEDIUM"
+    },
+    {
+        "Id":  "CVE-2025-15031",
+        "Score":  9.1,
+        "Severity":  "CRITICAL",
+        "Description":  "A vulnerability in MLflow\u0027s pyfunc extraction process allows for arbitrary file writes due to improper handling of tar archive entries. Specifically, the use of `tarfile.extractall` without path validation enables crafted tar.gz files containing `..` or absolute paths to escape the intended extraction directory. This issue affects the latest version of MLflow and poses a high/critical risk in scenarios involving multi-tenant environments or ingestion of untrusted artifacts, as it can lead to arbitrary file overwrites and potential remote code execution.",
+        "Refs":  [
+                     "https://huntr.com/bounties/09856f77-f968-446f-a930-657d126efe4e",
+                     "https://huntr.com/bounties/09856f77-f968-446f-a930-657d126efe4e"
+                 ],
+        "NvdUrl":  "https://nvd.nist.gov/vuln/detail/CVE-2025-15031",
+        "Published":  "2026-03-18",
+        "EpssScore":  0.0012,
+        "EpssPercentile":  0.305,
+        "InCisaKev":  false,
+        "AttentionScore":  27.4,
+        "AttentionLabel":  "MEDIUM"
+    },
+    {
+        "Id":  "CVE-2026-30304",
+        "Score":  9.6,
+        "Severity":  "CRITICAL",
+        "Description":  "In its design for automatic terminal command execution, AI Code offers two options: Execute safe commands and execute all commands. The description for the former states that commands determined by the model to be safe will be automatically executed, whereas if the model judges a command to be potentially destructive, it still requires user approval. However, this design is highly susceptible to prompt injection attacks. An attacker can employ a generic template to wrap any malicious command and mislead the model into misclassifying it as a \u0027safe\u0027 command, thereby bypassing the user approval requirement and resulting in arbitrary command execution.",
+        "Refs":  [
+                     "https://github.com/Secsys-FDU/LLM-Tool-Calling-CVEs/issues/2",
+                     "https://marketplace.visualstudio.com/items?itemName=tianguaduizhang.claude-dev-china"
+                 ],
+        "NvdUrl":  "https://nvd.nist.gov/vuln/detail/CVE-2026-30304",
+        "Published":  "2026-03-27",
+        "EpssScore":  0.0006,
+        "EpssPercentile":  0.191,
+        "InCisaKev":  false,
+        "AttentionScore":  21.1,
+        "AttentionLabel":  "LOW"
+    },
+    {
+        "Id":  "CVE-2026-24141",
+        "Score":  7.8,
+        "Severity":  "HIGH",
+        "Description":  "NVIDIA Model Optimizer for Windows and Linux contains a vulnerability in the ONNX quantization feature, where a user could cause unsafe deserialization by providing a specially crafted input file. A successful exploit of this vulnerability might lead to code execution, escalation of privileges, data tampering, and information disclosure.",
+        "Refs":  [
+                     "https://nvd.nist.gov/vuln/detail/CVE-2026-24141",
+                     "https://nvidia.custhelp.com/app/answers/detail/a_id/5798",
+                     "https://www.cve.org/CVERecord?id=CVE-2026-24141"
+                 ],
+        "NvdUrl":  "https://nvd.nist.gov/vuln/detail/CVE-2026-24141",
+        "Published":  "2026-03-24",
+        "EpssScore":  0.0007,
+        "EpssPercentile":  0.2058,
+        "InCisaKev":  false,
+        "AttentionScore":  20.1,
+        "AttentionLabel":  "LOW"
+    },
+    {
+        "Id":  "CVE-2025-15036",
+        "Score":  9.6,
+        "Severity":  "CRITICAL",
+        "Description":  "A path traversal vulnerability exists in the `extract_archive_to_dir` function within the `mlflow/pyfunc/dbconnect_artifact_cache.py` file of the mlflow/mlflow repository. This vulnerability, present in versions before v3.7.0, arises due to the lack of validation of tar member paths during extraction. An attacker with control over the tar.gz file can exploit this issue to overwrite arbitrary files or gain elevated privileges, potentially escaping the sandbox directory in multi-tenant or shared cluster environments.",
+        "Refs":  [
+                     "https://github.com/mlflow/mlflow/commit/3bf6d81ac4d38654c8ff012dbd0c3e9f17e7e346",
+                     "https://huntr.com/bounties/36c314cf-fd6e-4fb0-b9b0-1b47bcdf0eb0"
+                 ],
+        "NvdUrl":  "https://nvd.nist.gov/vuln/detail/CVE-2025-15036",
+        "Published":  "2026-03-30",
+        "EpssScore":  0.0005,
+        "EpssPercentile":  0.1539,
+        "InCisaKev":  false,
+        "AttentionScore":  18.8,
+        "AttentionLabel":  "LOW"
+    },
+    {
+        "Id":  "CVE-2026-33980",
+        "Score":  8.3,
+        "Severity":  "HIGH",
+        "Description":  "Azure Data Explorer MCP Server is a Model Context Protocol (MCP) server that enables AI assistants to execute KQL queries and explore Azure Data Explorer (ADX/Kusto) databases through standardized interfaces. Versions up to and including 0.1.1 contain KQL (Kusto Query Language) injection vulnerabilities in three MCP tool handlers: `get_table_schema`, `sample_table_data`, and `get_table_details`. The `table_name` parameter is interpolated directly into KQL queries via f-strings without any validation or sanitization, allowing an attacker (or a prompt-injected AI agent) to execute arbitrary KQL queries against the Azure Data Explorer cluster. Commit 0abe0ee55279e111281076393e5e966335fffd30 patches the issue.",
+        "Refs":  [
+                     "https://github.com/pab1it0/adx-mcp-server/commit/0abe0ee55279e111281076393e5e966335fffd30",
+                     "https://github.com/pab1it0/adx-mcp-server/security/advisories/GHSA-vphc-468g-8rfp",
+                     "https://github.com/pab1it0/adx-mcp-server/security/advisories/GHSA-vphc-468g-8rfp"
+                 ],
+        "NvdUrl":  "https://nvd.nist.gov/vuln/detail/CVE-2026-33980",
+        "Published":  "2026-03-27",
+        "EpssScore":  0.0005,
+        "EpssPercentile":  0.1418,
+        "InCisaKev":  false,
+        "AttentionScore":  16.8,
+        "AttentionLabel":  "LOW"
+    },
+    {
+        "Id":  "CVE-2026-33654",
+        "Score":  "N/A",
+        "Severity":  "UNKNOWN",
+        "Description":  "nanobot is a personal AI assistant. Prior to version 0.1.6, an indirect prompt injection vulnerability exists in the email channel processing module (`nanobot/channels/email.py`), allowing a remote, unauthenticated attacker to execute arbitrary LLM instructions (and subsequently, system tools) without any interaction from the bot owner. By sending an email containing malicious prompts to the bot\u0027s monitored email address, the bot automatically polls, ingests, and processes the email content as highly trusted input, fully bypassing channel isolation and resulting in a stealthy, zero-click attack. Version 0.1.6 patches the issue.",
+        "Refs":  [
+                     "https://github.com/HKUDS/nanobot/security/advisories/GHSA-4gmr-2vc8-7qh3",
+                     "https://github.com/HKUDS/nanobot/security/advisories/GHSA-4gmr-2vc8-7qh3"
+                 ],
+        "NvdUrl":  "https://nvd.nist.gov/vuln/detail/CVE-2026-33654",
+        "Published":  "2026-03-27",
+        "EpssScore":  0.001,
+        "EpssPercentile":  0.2641,
+        "InCisaKev":  false,
+        "AttentionScore":  15.8,
+        "AttentionLabel":  "LOW"
+    },
+    {
+        "Id":  "CVE-2026-5002",
+        "Score":  7.3,
+        "Severity":  "HIGH",
+        "Description":  "A vulnerability has been found in PromtEngineer localGPT up to 4d41c7d1713b16b216d8e062e51a5dd88b20b054. The impacted element is the function _route_using_overviews of the file backend/server.py of the component LLM Prompt Handler. Such manipulation leads to injection. The attack may be performed from remote. The exploit has been disclosed to the public and may be used. This product utilizes a rolling release system for continuous delivery, and as such, version information for affected or updated releases is not disclosed. The vendor was contacted early about this disclosure but did not respond in any way.",
+        "Refs":  [
+                     "https://github.com/August829/CVEP/issues/9",
+                     "https://vuldb.com/submit/779122",
+                     "https://vuldb.com/vuln/353889"
+                 ],
+        "NvdUrl":  "https://nvd.nist.gov/vuln/detail/CVE-2026-5002",
+        "Published":  "2026-03-28",
+        "EpssScore":  0.0004,
+        "EpssPercentile":  0.1339,
+        "InCisaKev":  false,
+        "AttentionScore":  15.3,
+        "AttentionLabel":  "LOW"
+    },
+    {
+        "Id":  "CVE-2026-32949",
+        "Score":  7.5,
+        "Severity":  "HIGH",
+        "Description":  "SQLBot is an intelligent data query system based on a large language model and RAG. Versions prior to 1.7.0 contain a Server-Side Request Forgery (SSRF) vulnerability that allows an attacker to retrieve arbitrary system and application files from the server. An attacker can exploit the /api/v1/datasource/check endpoint by configuring a forged MySQL data source with a malicious parameter extraJdbc=\"local_infile=1\". When the SQLBot backend attempts to verify the connectivity of this data source, an attacker-controlled Rogue MySQL server issues a malicious LOAD DATA LOCAL INFILE command during the MySQL handshake. This forces the target server to read arbitrary files from its local filesystem (such as /etc/passwd or configuration files) and transmit the contents back to the attacker. This issue was fixed in version 1.7.0.",
+        "Refs":  [
+                     "https://github.com/dataease/SQLBot/commit/ff98514827bad99b8fa4b39385adecc6e3d44355",
+                     "https://github.com/dataease/SQLBot/releases/tag/v1.7.0",
+                     "https://github.com/dataease/SQLBot/security/advisories/GHSA-wqj3-xcxf-j9m9"
+                 ],
+        "NvdUrl":  "https://nvd.nist.gov/vuln/detail/CVE-2026-32949",
+        "Published":  "2026-03-20",
+        "EpssScore":  0.0004,
+        "EpssPercentile":  0.1183,
+        "InCisaKev":  false,
+        "AttentionScore":  14.6,
+        "AttentionLabel":  "LOW"
+    },
+    {
+        "Id":  "CVE-2026-27893",
+        "Score":  8.8,
+        "Severity":  "HIGH",
+        "Description":  "vLLM is an inference and serving engine for large language models (LLMs). Starting in version 0.10.1 and prior to version 0.18.0, two model implementation files hardcode `trust_remote_code=True` when loading sub-components, bypassing the user\u0027s explicit `--trust-remote-code=False` security opt-out. This enables remote code execution via malicious model repositories even when the user has explicitly disabled remote code trust. Version 0.18.0 patches the issue.",
+        "Refs":  [
+                     "https://github.com/vllm-project/vllm/commit/00bd08edeee5dd4d4c13277c0114a464011acf72",
+                     "https://github.com/vllm-project/vllm/pull/36192",
+                     "https://github.com/vllm-project/vllm/security/advisories/GHSA-7972-pg2x-xr59"
+                 ],
+        "NvdUrl":  "https://nvd.nist.gov/vuln/detail/CVE-2026-27893",
+        "Published":  "2026-03-27",
+        "EpssScore":  0.0003,
+        "EpssPercentile":  0.094,
+        "InCisaKev":  false,
+        "AttentionScore":  14.4,
+        "AttentionLabel":  "LOW"
+    },
+    {
+        "Id":  "CVE-2026-33401",
+        "Score":  6.5,
+        "Severity":  "MEDIUM",
+        "Description":  "Wallos is an open-source, self-hostable personal subscription tracker. Prior to version 4.7.0, the patch introduced in commit e8a513591 (CVE-2026-30840) added SSRF protection to notification test endpoints but left three additional attack surfaces unprotected: the AI Ollama host parameter, the AI recommendations endpoint, and the notification cron job. An authenticated user can reach internal network services, cloud metadata endpoints (AWS IMDSv1, GCP, Azure IMDS), or localhost-bound services by supplying a crafted URL to any of these endpoints. This issue has been patched in version 4.7.0.",
+        "Refs":  [
+                     "https://github.com/ellite/Wallos/commit/e87387f0ebb540cd33e6dfda7181db9db650ecef",
+                     "https://github.com/ellite/Wallos/commit/e8a513591",
+                     "https://github.com/ellite/Wallos/security/advisories/GHSA-r82v-p8cg-rgx3"
+                 ],
+        "NvdUrl":  "https://nvd.nist.gov/vuln/detail/CVE-2026-33401",
+        "Published":  "2026-03-24",
+        "EpssScore":  0.0003,
+        "EpssPercentile":  0.0905,
+        "InCisaKev":  false,
+        "AttentionScore":  11.9,
+        "AttentionLabel":  "LOW"
+    },
+    {
+        "Id":  "CVE-2026-27740",
+        "Score":  6.1,
+        "Severity":  "MEDIUM",
+        "Description":  "Discourse is an open-source discussion platform. Versions prior to 2026.3.0-latest.1, 2026.2.1, and 2026.1.2 have a cross-site scripting vulnerability that arises because the system trusts the raw output from an AI Large Language Model (LLM) and renders it using htmlSafe in the Review Queue interface without adequate sanitization. A malicious attacker can use valid Prompt Injection techniques to force the AI to return a malicious payload (e.g., tags). When a Staff member (Admin/Moderator) views the flagged post in the Review Queue, the payload executes. Versions 2026.3.0-latest.1, 2026.2.1, and 2026.1.2 contain a patch. As a workaround, temporarily disable AI triage automation scripts.",
+        "Refs":  [
+                     "https://github.com/discourse/discourse/commit/44b84439df7e4424b2e7f216fd8fdd7dacff2227",
+                     "https://github.com/discourse/discourse/commit/8ae7cb2414d6918d7fc45e1fda7ffbb32912a975",
+                     "https://github.com/discourse/discourse/commit/ed70949f2c047196f33cfa94f2819df29c5d1e5f"
+                 ],
+        "NvdUrl":  "https://nvd.nist.gov/vuln/detail/CVE-2026-27740",
+        "Published":  "2026-03-19",
+        "EpssScore":  0.0003,
+        "EpssPercentile":  0.0908,
+        "InCisaKev":  false,
+        "AttentionScore":  11.5,
+        "AttentionLabel":  "LOW"
+    },
+    {
+        "Id":  "CVE-2026-28500",
+        "Score":  8.6,
+        "Severity":  "HIGH",
+        "Description":  "Open Neural Network Exchange (ONNX) is an open standard for machine learning interoperability. In versions up to and including 1.20.1, a security control bypass exists in onnx.hub.load() due to improper logic in the repository trust verification mechanism. While the function is designed to warn users when loading models from non-official sources, the use of the silent=True parameter completely suppresses all security warnings and confirmation prompts. This vulnerability transforms a standard model-loading function into a vector for Zero-Interaction Supply-Chain Attacks. When chained with file-system vulnerabilities, an attacker can silently exfiltrate sensitive files (SSH keys, cloud credentials) from the victim\u0027s machine the moment the model is loaded. As of time of publication, no known patched versions are available.",
+        "Refs":  [
+                     "https://github.com/ZeroXJacks/CVEs/blob/main/2026/CVE-2026-28500.md",
+                     "https://github.com/onnx/onnx/security/advisories/GHSA-hqmj-h5c6-369m",
+                     "https://github.com/ZeroXJacks/CVEs/blob/main/2026/CVE-2026-28500.md"
+                 ],
+        "NvdUrl":  "https://nvd.nist.gov/vuln/detail/CVE-2026-28500",
+        "Published":  "2026-03-18",
+        "EpssScore":  0.0001,
+        "EpssPercentile":  0.0108,
+        "InCisaKev":  false,
+        "AttentionScore":  9.2,
+        "AttentionLabel":  "LOW"
+    },
+    {
+        "Id":  "CVE-2025-15381",
+        "Score":  8.1,
+        "Severity":  "HIGH",
+        "Description":  "In the latest version of mlflow/mlflow, when the `basic-auth` app is enabled, tracing and assessment endpoints are not protected by permission validators. This allows any authenticated user, including those with `NO_PERMISSIONS` on the experiment, to read trace information and create assessments for traces they should not have access to. This vulnerability impacts confidentiality by exposing trace metadata and integrity by allowing unauthorized creation of assessments. Deployments using `mlflow server --app-name=basic-auth` are affected.",
+        "Refs":  [
+                     "https://huntr.com/bounties/149fb2f9-ef4b-4136-a25c-20563451904c"
+                 ],
+        "NvdUrl":  "https://nvd.nist.gov/vuln/detail/CVE-2025-15381",
+        "Published":  "2026-03-27",
+        "EpssScore":  0.0001,
+        "EpssPercentile":  0.011,
+        "InCisaKev":  false,
+        "AttentionScore":  8.8,
+        "AttentionLabel":  "LOW"
+    },
+    {
+        "Id":  "CVE-2026-4963",
+        "Score":  6.3,
+        "Severity":  "MEDIUM",
+        "Description":  "A weakness has been identified in huggingface smolagents 1.25.0.dev0. This affects the function evaluate_augassign/evaluate_call/evaluate_with of the file src/smolagents/local_python_executor.py of the component Incomplete Fix CVE-2025-9959. This manipulation causes code injection. It is possible to initiate the attack remotely. The exploit has been made available to the public and could be used for attacks. The vendor was contacted early about this disclosure but did not respond in any way.",
+        "Refs":  [
+                     "https://gist.github.com/YLChen-007/35b7d46e892266a0ed6dbe57802858be",
+                     "https://gist.github.com/YLChen-007/7146f45960f79bc1e2976fed526e0a9b",
+                     "https://vuldb.com/?ctiid.353840"
+                 ],
+        "NvdUrl":  "https://nvd.nist.gov/vuln/detail/CVE-2026-4963",
+        "Published":  "2026-03-27",
+        "EpssScore":  0.0001,
+        "EpssPercentile":  0.0228,
+        "InCisaKev":  false,
+        "AttentionScore":  7.7,
+        "AttentionLabel":  "LOW"
+    },
+    {
+        "Id":  "CVE-2026-34070",
+        "Score":  7.5,
+        "Severity":  "HIGH",
+        "Description":  "LangChain is a framework for building agents and LLM-powered applications. Prior to version 1.2.22, multiple functions in langchain_core.prompts.loading read files from paths embedded in deserialized config dicts without validating against directory traversal or absolute path injection. When an application passes user-influenced prompt configurations to load_prompt() or load_prompt_from_config(), an attacker can read arbitrary files on the host filesystem, constrained only by file-extension checks (.txt for templates, .json/.yaml for examples). This issue has been patched in version 1.2.22.",
+        "Refs":  [
+                     "https://github.com/langchain-ai/langchain/commit/27add913474e01e33bededf4096151130ba0d47c",
+                     "https://github.com/langchain-ai/langchain/releases/tag/langchain-core==1.2.22",
+                     "https://github.com/langchain-ai/langchain/security/advisories/GHSA-qh6h-p6c9-ff54"
+                 ],
+        "NvdUrl":  "https://nvd.nist.gov/vuln/detail/CVE-2026-34070",
+        "Published":  "2026-03-31",
+        "EpssScore":  null,
+        "EpssPercentile":  null,
+        "InCisaKev":  false,
+        "AttentionScore":  7.5,
+        "AttentionLabel":  "LOW"
+    },
+    {
+        "Id":  "CVE-2026-33060",
+        "Score":  5.3,
+        "Severity":  "MEDIUM",
+        "Description":  "CKAN MCP Server is a tool for querying CKAN open data portals. Versions prior to 0.4.85 provide tools including ckan_package_search and sparql_query that accept a base_url parameter, making HTTP requests to arbitrary endpoints without restriction. A CKAN portal client has no legitimate reason to contact cloud metadata or internal network services. There is no URL validation on base_url parameter. No private IP blocking (RFC 1918, link-local 169.254.x.x), no cloud metadata blocking. The sparql_query and ckan_datastore_search_sql tools also accept arbitrary base URLs and expose injection surfaces. An attack can lead to internal network scanning, cloud metadata theft (IAM credentials via IMDS at 169.254.169.254), potential SQL/SPARQL injection via unsanitized query parameters. Attack requires prompt injection to control the base_url parameter. This issue has been fixed in version 0.4.85.",
+        "Refs":  [
+                     "https://github.com/kysely-org/kysely/commit/0a602bff2f442f6c26d5e047ca8f8715179f6d24",
+                     "https://github.com/ondata/ckan-mcp-server/security/advisories/GHSA-3xm7-qw7j-qc8v"
+                 ],
+        "NvdUrl":  "https://nvd.nist.gov/vuln/detail/CVE-2026-33060",
+        "Published":  "2026-03-20",
+        "EpssScore":  0.0001,
+        "EpssPercentile":  0.0132,
+        "InCisaKev":  false,
+        "AttentionScore":  6.1,
+        "AttentionLabel":  "LOW"
+    },
+    {
+        "Id":  "CVE-2026-4993",
+        "Score":  3.3,
+        "Severity":  "LOW",
+        "Description":  "A vulnerability has been found in wandb OpenUI up to 0.0.0.0/1.0. This impacts an unknown function of the file backend/openui/config.py. The manipulation of the argument LITELLM_MASTER_KEY leads to hard-coded credentials. An attack has to be approached locally. The exploit has been disclosed to the public and may be used. The vendor was contacted early about this disclosure but did not respond in any way.",
+        "Refs":  [
+                     "https://gist.github.com/YLChen-007/3bf37486022d4c57caec3a35cd79ac92",
+                     "https://vuldb.com/?ctiid.353880",
+                     "https://vuldb.com/?id.353880"
+                 ],
+        "NvdUrl":  "https://nvd.nist.gov/vuln/detail/CVE-2026-4993",
+        "Published":  "2026-03-28",
+        "EpssScore":  0.0001,
+        "EpssPercentile":  0.0131,
+        "InCisaKev":  false,
+        "AttentionScore":  4.1,
+        "AttentionLabel":  "LOW"
+    },
+    {
+        "Id":  "CVE-2026-30308",
+        "Score":  "N/A",
+        "Severity":  "UNKNOWN",
+        "Description":  "In its design for automatic terminal command execution, HAI Build Code Generator offers two options: Execute safe commands and Execute all commands. The description for the former states that commands determined by the model to be safe will be automatically executed, whereas if the model judges a command to be potentially destructive, it still requires user approval. However, this design is highly susceptible to prompt injection attacks. An attacker can employ a generic template to wrap any malicious command and mislead the model into misclassifying it as a \u0027safe\u0027 command, thereby bypassing the user approval requirement and resulting in arbitrary command execution.",
+        "Refs":  [
+                     "https://github.com/Secsys-FDU/LLM-Tool-Calling-CVEs/issues/10",
+                     "https://github.com/presidio-oss/hai-build"
+                 ],
+        "NvdUrl":  "https://nvd.nist.gov/vuln/detail/CVE-2026-30308",
+        "Published":  "2026-03-30",
+        "EpssScore":  null,
+        "EpssPercentile":  null,
+        "InCisaKev":  false,
+        "AttentionScore":  0,
+        "AttentionLabel":  "LOW"
+    },
+    {
+        "Id":  "CVE-2026-30306",
+        "Score":  "N/A",
+        "Severity":  "UNKNOWN",
+        "Description":  "In its design for automatic terminal command execution, SakaDev offers two options: Execute safe commands and execute all commands. The description for the former states that commands determined by the model to be safe will be automatically executed, whereas if the model judges a command to be potentially destructive, it still requires user approval. However, this design is highly susceptible to prompt injection attacks. An attacker can employ a generic template to wrap any malicious command and mislead the model into misclassifying it as a \u0027safe\u0027 command, thereby bypassing the user approval requirement and resulting in arbitrary command execution.",
+        "Refs":  [
+                     "https://github.com/Secsys-FDU/LLM-Tool-Calling-CVEs/issues/4",
+                     "https://marketplace.visualstudio.com/items?itemName=rahmanazhar.saka-dev"
+                 ],
+        "NvdUrl":  "https://nvd.nist.gov/vuln/detail/CVE-2026-30306",
+        "Published":  "2026-03-30",
+        "EpssScore":  null,
+        "EpssPercentile":  null,
+        "InCisaKev":  false,
+        "AttentionScore":  0,
+        "AttentionLabel":  "LOW"
+    }
+]

@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Import: schtasks /Create /XML ".\WeeklyCveReport.xml" /TN "AI-CVE-Weekly"
+     Run:    schtasks /Run /TN "AI-CVE-Weekly"
+     Delete: schtasks /Delete /TN "AI-CVE-Weekly" /F
+     EDIT: Replace YOUR_API_KEY and C:\ai-cve\ before use -->
+<Task version="1.4" xmlns="http://schemas.microsoft.com/windows/2004/02/mit/task">
+  <RegistrationInfo>
+    <Description>AI/LLM/ML CVE Weekly Report - Every Monday 09:00</Description>
+    <Author>AI-Security-Team</Author>
+  </RegistrationInfo>
+  <Triggers>
+    <CalendarTrigger>
+      <StartBoundary>2026-01-06T09:00:00</StartBoundary>
+      <Enabled>true</Enabled>
+      <ScheduleByWeek>
+        <WeeksInterval>1</WeeksInterval>
+        <DaysOfWeek><Monday /></DaysOfWeek>
+      </ScheduleByWeek>
+    </CalendarTrigger>
+  </Triggers>
+  <Principals>
+    <Principal id="Author">
+      <LogonType>InteractiveToken</LogonType>
+      <RunLevel>LeastPrivilege</RunLevel>
+    </Principal>
+  </Principals>
+  <Settings>
+    <ExecutionTimeLimit>PT2H</ExecutionTimeLimit>
+    <MultipleInstancesPolicy>IgnoreNew</MultipleInstancesPolicy>
+    <DisallowStartIfOnBatteries>false</DisallowStartIfOnBatteries>
+    <StopIfGoingOnBatteries>false</StopIfGoingOnBatteries>
+    <StartWhenAvailable>true</StartWhenAvailable>
+  </Settings>
+  <Actions Context="Author">
+    <Exec>
+      <Command>powershell.exe</Command>
+      <Arguments>-ExecutionPolicy Bypass -Command "$env:ANTHROPIC_API_KEY = 'YOUR_API_KEY'; &amp; 'C:\ai-cve\Run-All.ps1' -Days 14 -OutputDir 'C:\ai-cve\output'"</Arguments>
+      <WorkingDirectory>C:\ai-cve</WorkingDirectory>
+    </Exec>
+  </Actions>
+</Task>
