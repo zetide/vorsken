@@ -1,0 +1,59 @@
+name: 'stacksecai Policy Gate'
+description: 'Enforce security policies on PRs via Semgrep + Claude AI. Returns BLOCK / FLAG / PASS.'
+author: 'rilvak'
+
+branding:
+  icon: 'shield'
+  color: 'red'
+
+inputs:
+  anthropic-api-key:
+    description: 'Anthropic API key for Claude'
+    required: true
+  semgrep-rules:
+    description: 'Path to Semgrep rules directory'
+    required: false
+    default: 'rules/custom'
+  block-on-error:
+    description: 'Exit code 1 on BLOCK verdict (blocks merge if required check)'
+    required: false
+    default: 'true'
+  github-token:
+    description: 'GitHub token for PR comments'
+    required: false
+    default: ${{ github.token }}
+  target-path:
+    description: 'Path to scan (defaults to repo root)'
+    required: false
+    default: '.'
+
+outputs:
+  verdict:
+    description: 'Policy Gate verdict: BLOCK | FLAG | PASS'
+    value: ${{ steps.gate.outputs.verdict }}
+
+runs:
+  using: 'composite'
+  steps:
+    - name: Set up Python
+      uses: actions/setup-python@v5
+      with:
+        python-version: '3.11'
+
+    - name: Install dependencies
+      shell: bash
+      run: pip install -r ${{ github.action_path }}/requirements.txt
+
+    - name: Run Policy Gate
+      id: gate
+      shell: bash
+      run: python -m stacksecai.main
+      working-directory: ${{ github.action_path }}/src
+      env:
+        ANTHROPIC_API_KEY: ${{ inputs.anthropic-api-key }}
+        SEMGREP_RULES:     ${{ inputs.semgrep-rules }}
+        BLOCK_ON_ERROR:    ${{ inputs.block-on-error }}
+        GITHUB_TOKEN:      ${{ inputs.github-token }}
+        TARGET_PATH:       ${{ inputs.target-path }}
+        GITHUB_REPOSITORY: ${{ github.repository }}
+        PR_NUMBER:         ${{ github.event.pull_request.number }}

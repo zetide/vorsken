@@ -1,0 +1,7 @@
+rules:
+  - id: eval-injection
+    patterns:
+      - pattern: eval(...)
+    message: "Potential code injection via eval(). BLOCK: remove or sandbox."
+    languages: [python]
+    severity: ERROR

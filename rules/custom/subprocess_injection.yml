@@ -1,0 +1,8 @@
+rules:
+  - id: subprocess-shell-true
+    patterns:
+      - pattern: subprocess.run(..., shell=True, ...)
+      - pattern: subprocess.Popen(..., shell=True, ...)
+    message: "shell=True with subprocess is a command injection risk."
+    languages: [python]
+    severity: ERROR

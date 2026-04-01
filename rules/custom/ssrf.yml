@@ -1,0 +1,8 @@
+rules:
+  - id: ssrf-via-requests
+    patterns:
+      - pattern: requests.get($URL, ...)
+      - pattern-not: requests.get("https://...", ...)
+    message: "Potential SSRF: validate/allowlist URL before making requests."
+    languages: [python]
+    severity: WARNING
