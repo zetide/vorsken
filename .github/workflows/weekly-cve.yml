@@ -1,0 +1,64 @@
+name: Weekly AI/LLM CVE Analyzer
+
+on:
+  schedule:
+    - cron: '30 21 * * 3'  # Thursday 06:30 JST (Wednesday 21:30 UTC)
+  workflow_dispatch:        # Manual trigger (for testing)
+
+jobs:
+  analyze-cves:
+    runs-on: windows-latest
+    timeout-minutes: 60
+
+    steps:
+      # ----------------------------------------
+      # 1. Checkout cve-analyzer repository
+      # ----------------------------------------
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      # ----------------------------------------
+      # 2. Set environment variables
+      # ----------------------------------------
+      - name: Set environment variables
+        shell: pwsh
+        run: |
+          echo "ANTHROPIC_API_KEY=${{ secrets.ANTHROPIC_API_KEY }}" >> $env:GITHUB_ENV
+          echo "GITHUB_TOKEN=${{ secrets.SECAIHUB_TOKEN }}" >> $env:GITHUB_ENV
+
+      # ----------------------------------------
+      # 3. Run Test-Encoding (pre-flight check)
+      # ----------------------------------------
+      - name: Pre-flight encoding test
+        shell: powershell
+        run: |
+          $result = .\Test-Encoding.ps1
+          Write-Host $result
+          if ($result -match "FAILED") {
+            Write-Error "Encoding test failed. Aborting."
+            exit 1
+          }
+
+      # ----------------------------------------
+      # 4. Run full pipeline
+      # ----------------------------------------
+      - name: Run CVE pipeline
+        shell: powershell
+        env:
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+          GITHUB_TOKEN: ${{ secrets.SECAIHUB_TOKEN }}
+        run: |
+          .\Run-All.ps1
+
+      # ----------------------------------------
+      # 5. Upload reports as artifacts
+      # ----------------------------------------
+      - name: Upload report artifacts
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: cve-report-${{ github.run_id }}
+          path: |
+            output\*.md
+            output\*.json
+          retention-days: 90
