@@ -50,6 +50,8 @@ def run_semgrep(
         cwd=target_path,
         capture_output=True,
         text=True,
+        encoding="utf-8",   # ← 追加
+        errors="replace",   # ← 追加（不正バイト対策）
     )
 
     if result.returncode not in (0, 1):

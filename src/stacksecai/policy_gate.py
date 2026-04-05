@@ -1,39 +1,31 @@
-"""
-Policy Gate: Core verdict logic for stacksecai.
-Returns BLOCK / FLAG / PASS based on Semgrep + Claude results.
-"""
-
-SEMGREP_BLOCK_SEVERITIES = {"ERROR"}
-SEMGREP_FLAG_SEVERITIES = {"WARNING"}
-CLAUDE_BLOCK_LABELS = {"CRITICAL", "HIGH"}
-CLAUDE_FLAG_LABELS = {"MEDIUM"}
+from typing import Any, Dict, List
 
 
-def compute_verdict(semgrep_findings: list, claude_verdict: str) -> str:
+def compute_verdict(findings: List[Dict[str, Any]], claude_severity: str) -> str:
     """
-    Args:
-        semgrep_findings: list of Semgrep result dicts (JSON output)
-        claude_verdict:   string from Claude e.g. "CRITICAL" / "HIGH" / "MEDIUM" / "LOW" / "PASS"
-    Returns:
-        "BLOCK" | "FLAG" | "PASS"
+    findings: Semgrepの結果リスト
+    claude_severity: Claudeが判定したseverity文字列 ("CRITICAL", "HIGH", "MEDIUM", "LOW", "PASS")
+    戻り値: "BLOCK" / "FLAG" / "PASS"
     """
-    severities = {f.get("extra", {}).get("severity", "").upper() for f in semgrep_findings}
+    has_error = any(
+        r.get("extra", {}).get("severity", "").upper() == "ERROR"
+        for r in findings
+    )
+    has_warning = any(
+        r.get("extra", {}).get("severity", "").upper() == "WARNING"
+        for r in findings
+    )
 
-    if severities & SEMGREP_BLOCK_SEVERITIES or claude_verdict.upper() in CLAUDE_BLOCK_LABELS:
+    # BLOCK の条件（Semgrep ERROR が最優先）
+    if has_error:
         return "BLOCK"
-    if severities & SEMGREP_FLAG_SEVERITIES or claude_verdict.upper() in CLAUDE_FLAG_LABELS:
+    if claude_severity.upper() in ("CRITICAL", "HIGH"):
+        return "BLOCK"
+
+    # FLAG の条件
+    if has_warning:
         return "FLAG"
+    if claude_severity.upper() == "MEDIUM":
+        return "FLAG"
+
     return "PASS"
-
-
-VERDICT_EMOJI = {
-    "BLOCK": "🚫",
-    "FLAG":  "⚠️",
-    "PASS":  "✅",
-}
-
-EXIT_CODES = {
-    "BLOCK": 1,
-    "FLAG":  0,
-    "PASS":  0,
-}
