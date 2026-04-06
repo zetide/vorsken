@@ -9,6 +9,10 @@ from .semgrep_runner import run_semgrep
 from .claude_analyzer import analyze_with_claude
 from .policy_gate import compute_verdict, EXIT_CODES
 from .pr_commenter import post_pr_comment, VERDICT_BADGE
+# src/stacksecai/__main__.py
+from .gate import main
+import sys
+sys.exit(main())
 
 
 def main():
