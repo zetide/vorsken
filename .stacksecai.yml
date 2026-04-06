@@ -1,0 +1,17 @@
+﻿# StackSecAI Policy Gate configuration
+# https://rilvak.dev
+
+policy:
+  block_on: ["ERROR"]
+  flag_on:  ["WARNING"]
+
+claude:
+  model: "claude-haiku-4-5"
+  severity_block: ["CRITICAL", "HIGH"]
+  severity_flag:  ["MEDIUM"]
+
+rules:
+  overrides: []
+  # Example:
+  # - rule_id: "hardcoded-password"
+  #   action: "BLOCK"
