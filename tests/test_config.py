@@ -51,3 +51,51 @@ def test_compute_verdict_default_config():
     findings = [{"extra": {"severity": "WARNING"}}]
     # デフォルト: WARNING → FLAG
     assert compute_verdict(findings, "LOW") == "FLAG"
+
+def test_rule_override_block():
+    """rule_overrides で BLOCK が強制されること"""
+    from stacksecai.policy_gate import compute_verdict
+    from stacksecai.config import PolicyConfig
+
+    cfg = PolicyConfig(
+        block_on=[],           # Semgrep ERROR でも通常はBLOCKしない設定
+        flag_on=[],
+        severity_block=[],     # Claude も BLOCK しない設定
+        severity_flag=[],
+        rule_overrides={"hardcoded-password": "BLOCK"},
+    )
+    findings = [{"check_id": "rules.custom.hardcoded-password",
+                 "extra": {"severity": "WARNING"}}]
+    assert compute_verdict(findings, "LOW", config=cfg) == "BLOCK"
+
+
+def test_rule_override_flag_downgrades_error():
+    """ERROR finding でも rule_overrides FLAG なら FLAG になること"""
+    from stacksecai.policy_gate import compute_verdict
+    from stacksecai.config import PolicyConfig
+
+    cfg = PolicyConfig(
+        block_on=[],           # ERRORをBLOCKしない
+        flag_on=[],
+        severity_block=[],
+        severity_flag=[],
+        rule_overrides={"eval-injection": "FLAG"},
+    )
+    findings = [{"check_id": "rules.custom.eval-injection",
+                 "extra": {"severity": "ERROR"}}]
+    assert compute_verdict(findings, "LOW", config=cfg) == "FLAG"
+
+
+def test_rule_override_no_match_returns_pass():
+    """マッチするルールがなければ通常判定（PASS）になること"""
+    from stacksecai.policy_gate import compute_verdict
+    from stacksecai.config import PolicyConfig
+
+    cfg = PolicyConfig(
+        block_on=[], flag_on=[],
+        severity_block=[], severity_flag=[],
+        rule_overrides={"other-rule": "BLOCK"},
+    )
+    findings = [{"check_id": "rules.custom.eval-injection",
+                 "extra": {"severity": "WARNING"}}]
+    assert compute_verdict(findings, "LOW", config=cfg) == "PASS"

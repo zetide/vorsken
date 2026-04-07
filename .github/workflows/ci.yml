@@ -1,3 +1,4 @@
+$content = @"
 name: CI
 
 on:
@@ -18,9 +19,14 @@ jobs:
           python-version: '3.11'
 
       - name: Install dependencies
-        run: pip install -r requirements.txt pytest
+        run: pip install -e `".[dev]`" pyyaml semgrep
 
       - name: Run tests
         run: pytest tests/ -v
-        env:
-          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+"@
+
+[System.IO.File]::WriteAllText(
+    "$PWD\.github\workflows\ci.yml",
+    $content,
+    [System.Text.UTF8Encoding]::new($false)
+)
