@@ -14,7 +14,7 @@ dependencies = [
 ]
 
 [project.optional-dependencies]
-dev = ["pytest", "pytest-cov", "ruff"]
+dev = ["pytest", "pytest-cov", "ruff", "mypy", "types-requests", "types-PyYAML",]
 
 [tool.setuptools.packages.find]
 where = ["src"]
