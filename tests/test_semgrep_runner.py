@@ -61,3 +61,11 @@ def test_run_semgrep_reads_from_file(tmp_path):
         )
 
     assert result == findings
+
+# semgrep_runner.py 行67をカバー: stdout フォールバック
+def test_run_semgrep_stdout_fallback():
+    findings = [{"check_id": "rule.stdout"}]
+    stdout_json = json.dumps({"results": findings})
+    with patch("subprocess.run", return_value=_mock_result(0, stdout=stdout_json)):
+        result = run_semgrep(output_path=None)
+    assert result == findings
