@@ -1,67 +1,66 @@
-import pytest
-from src.stacksecai.semgrep_runner import run_semgrep
-
-
-def test_run_semgrep_on_fixture_returns_findings():
-    findings = run_semgrep(
-        rules_path="rules/",
-        target_path=".",
-        include="tests/fixtures/**",
-        output_path=None,
-    )
-    assert len(findings) > 0
 import json
-import subprocess
-from pathlib import Path
-from unittest.mock import patch, MagicMock
-from stacksecai.semgrep_runner import run_semgrep
+import shutil
+from unittest.mock import MagicMock, patch
+
 import pytest
 
+from stacksecai.semgrep_runner import run_semgrep
 
-def _mock_result(returncode=0, stdout=""):
+
+def _mock_result(returncode=0, stdout=''):
     m = MagicMock()
     m.returncode = returncode
     m.stdout = stdout
-    m.stderr = ""
+    m.stderr = ''
     return m
 
 
-# --- 行42をカバー: output_path を指定して呼ぶ ---
-def test_run_semgrep_with_output_path(tmp_path):
-    findings = [{"check_id": "rule.test"}]
-    output_file = tmp_path / "semgrep-results.json"
-    output_file.write_text(json.dumps({"results": findings}), encoding="utf-8")
+@pytest.mark.skipif(
+    not shutil.which('semgrep'),
+    reason='semgrep not available in this environment',
+)
+def test_run_semgrep_on_fixture_returns_findings():
+    findings = run_semgrep(
+        rules_path='rules/',
+        target_path='.',
+        include='tests/fixtures/**',
+        output_path=None,
+    )
+    assert len(findings) > 0
 
-    with patch("subprocess.run", return_value=_mock_result(0)) as mock_sub:
+
+def test_run_semgrep_with_output_path(tmp_path):
+    findings = [{'check_id': 'rule.test'}]
+    output_file = tmp_path / 'semgrep-results.json'
+    output_file.write_text(json.dumps({'results': findings}), encoding='utf-8')
+
+    with patch('subprocess.run', return_value=_mock_result(0)) as mock_sub:
         result = run_semgrep(
-            rules_path="rules/",
+            rules_path='rules/',
             target_path=str(tmp_path),
-            output_path="semgrep-results.json",  # ← 行42 実行
+            output_path='semgrep-results.json',
         )
 
     assert result == findings
-    # --output が cmd に含まれているか確認
     called_cmd = mock_sub.call_args[0][0]
-    assert "--output" in called_cmd
+    assert '--output' in called_cmd
 
 
-# --- 行58をカバー: returncode=2 でRuntimeError ---
 def test_run_semgrep_raises_on_bad_returncode():
-    with patch("subprocess.run", return_value=_mock_result(returncode=2, stdout="")):
-        with pytest.raises(RuntimeError, match="Semgrep failed with code 2"):
-            run_semgrep(output_path=None)  # ← 行58 実行
+    with patch('subprocess.run', return_value=_mock_result(returncode=2, stdout='')):
+        with pytest.raises(RuntimeError, match='Semgrep failed with code 2'):
+            run_semgrep(output_path=None)
 
 
-# --- 行64-65をカバー: ファイルが存在する場合の読み込み ---
 def test_run_semgrep_reads_from_file(tmp_path):
-    findings = [{"check_id": "rule.file-read"}]
-    output_file = tmp_path / "semgrep-results.json"
-    output_file.write_text(json.dumps({"results": findings}), encoding="utf-8")
+    findings = [{'check_id': 'rule.file-read'}]
+    output_file = tmp_path / 'semgrep-results.json'
+    output_file.write_text(json.dumps({'results': findings}), encoding='utf-8')
 
-    with patch("subprocess.run", return_value=_mock_result(0)):
+    with patch('subprocess.run', return_value=_mock_result(0)):
         result = run_semgrep(
             target_path=str(tmp_path),
-            output_path="semgrep-results.json",  # ← 行64-65 実行
+            output_path='semgrep-results.json',
         )
 
     assert result == findings
