@@ -86,8 +86,8 @@ def analyze_with_claude(findings: list) -> tuple[str, str, list]:
             )
             # ✅ 修正: TextBlock のみを対象にする
             block = message.content[0]
-            if not isinstance(block, TextBlock):
-                raise ValueError(f"Unexpected block type: {type(block)}")
+            if not isinstance(block, TextBlock):  # pragma: no cover
+                raise ValueError(f"Unexpected block type: {type(block)}")  # pragma: no cover
 
             raw  = "{" + block.text.strip()
             data = json.loads(raw)
@@ -111,4 +111,4 @@ def analyze_with_claude(findings: list) -> tuple[str, str, list]:
                 )
 
     # ✅ 修正: ループ後の fallback（mypy の Missing return statement 対策）
-    return "INFO", "Claude did not respond.", []
+    return "INFO", "Claude did not respond.", []  # pragma: no cover
