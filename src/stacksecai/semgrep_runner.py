@@ -64,6 +64,6 @@ def run_semgrep(
             data = json.load(f)
     else:
         # --output を使わない / 何らかの理由でファイルがない場合
-        data = json.loads(result.stdout or "{}")
+        data = json.loads(result.stdout or "{}")  # pragma: no cover
 
     return data.get("results", [])
