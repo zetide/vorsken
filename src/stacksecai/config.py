@@ -3,10 +3,11 @@
 Loads .stacksecai.yml config. Falls back to defaults if file not found.
 """
 from __future__ import annotations
+
 from dataclasses import dataclass, field
 from pathlib import Path
-import yaml  # PyYAML
 
+import yaml  # PyYAML
 
 DEFAULT_CONFIG = {
     "policy": {

@@ -1,5 +1,4 @@
-$content = @"
-name: CI
+﻿name: CI
 
 on:
   push:
@@ -8,7 +7,7 @@ on:
     branches: [main]
 
 jobs:
-  test:
+  quality:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -19,14 +18,13 @@ jobs:
           python-version: '3.11'
 
       - name: Install dependencies
-        run: pip install -e `".[dev]`" pyyaml semgrep
+        run: pip install -e ".[dev]" pyyaml semgrep
 
-      - name: Run tests
-        run: pytest tests/ -v
-"@
+      - name: Lint (ruff)
+        run: ruff check src/
 
-[System.IO.File]::WriteAllText(
-    "$PWD\.github\workflows\ci.yml",
-    $content,
-    [System.Text.UTF8Encoding]::new($false)
-)
+      - name: Type check (mypy)
+        run: mypy src/stacksecai --ignore-missing-imports
+
+      - name: Test + Coverage
+        run: pytest --tb=short -q

@@ -7,6 +7,7 @@ import os
 import time
 
 import anthropic
+from anthropic.types import TextBlock  # ← 追加
 
 MAX_RETRIES = 3
 RETRY_DELAY = 2  # seconds
@@ -52,10 +53,10 @@ def _build_findings_text(findings: list) -> str:
         return "No findings detected."
     lines = []
     for f in findings:
-        sev   = f.get("extra", {}).get("severity", "UNKNOWN")
-        rule  = f.get("check_id", "unknown")
-        path  = f.get("path", "unknown")
-        line  = f.get("start", {}).get("line", "?")
+        sev  = f.get("extra", {}).get("severity", "UNKNOWN")
+        rule = f.get("check_id", "unknown")
+        path = f.get("path", "unknown")
+        line = f.get("start", {}).get("line", "?")
         lines.append(f"- [{sev}] {rule}: {path}:{line}")
     return "\n".join(lines)
 
@@ -79,20 +80,24 @@ def analyze_with_claude(findings: list) -> tuple[str, str, list]:
                 max_tokens=512,
                 system=SYSTEM_PROMPT,
                 messages=[
-                    {"role": "user",    "content": user_content},
-                    {"role": "assistant", "content": "{"},  # JSON prefill
+                    {"role": "user",      "content": user_content},
+                    {"role": "assistant", "content": "{"},
                 ],
             )
-            raw  = "{" + message.content[0].text.strip()
+            # ✅ 修正: TextBlock のみを対象にする
+            block = message.content[0]
+            if not isinstance(block, TextBlock):
+                raise ValueError(f"Unexpected block type: {type(block)}")
+
+            raw  = "{" + block.text.strip()
             data = json.loads(raw)
 
             severity = data.get("severity", "INFO").upper()
             summary  = data.get("summary", "No summary available.")
-            details  = data.get("findings", [])
+            details: list[dict] = data.get("findings", [])
             return severity, summary, details
 
-        except (json.JSONDecodeError, KeyError):
-            # Claude returned non-JSON — fall back to safe default
+        except (json.JSONDecodeError, KeyError, ValueError):
             if attempt == MAX_RETRIES - 1:
                 return "INFO", "Claude response could not be parsed.", []
             time.sleep(RETRY_DELAY * (attempt + 1))
@@ -104,3 +109,6 @@ def analyze_with_claude(findings: list) -> tuple[str, str, list]:
                 raise RuntimeError(
                     f"Claude API failed after {MAX_RETRIES} attempts: {e}"
                 )
+
+    # ✅ 修正: ループ後の fallback（mypy の Missing return statement 対策）
+    return "INFO", "Claude did not respond.", []

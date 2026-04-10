@@ -14,7 +14,7 @@ dependencies = [
 ]
 
 [project.optional-dependencies]
-dev = ["pytest", "pytest-cov"]
+dev = ["pytest", "pytest-cov", "ruff"]
 
 [tool.setuptools.packages.find]
 where = ["src"]
@@ -23,3 +23,22 @@ where = ["src"]
 filterwarnings = [
     "error::EncodingWarning",
 ]
+addopts = "--cov=stacksecai --cov-report=term-missing --cov-fail-under=80"
+
+[tool.coverage.run]
+source = ["src/stacksecai"]
+omit   = ["*/__pycache__/*"]
+
+[tool.coverage.report]
+exclude_lines = [
+    "pragma: no cover",
+    "if __name__ == .__main__.:",
+    "raise NotImplementedError",
+]
+[tool.ruff]
+line-length = 88
+target-version = "py311"
+
+[tool.ruff.lint]
+select = ["E", "F", "I"]  # E=pycodestyle, F=pyflakes, I=isort
+ignore = ["E501"]          # 長い行は許容

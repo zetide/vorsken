@@ -1,5 +1,6 @@
 # src/stacksecai/policy_gate.py
 from __future__ import annotations
+
 from .config import PolicyConfig, load_config
 
 EXIT_CODES = {"BLOCK": 1, "FLAG": 0, "PASS": 0}

@@ -10,7 +10,7 @@ from pathlib import Path
 
 from .claude_analyzer import analyze_with_claude
 from .policy_gate import compute_verdict
-from .pr_commenter import format_pr_comment, VERDICT_BADGE
+from .pr_commenter import VERDICT_BADGE, format_pr_comment
 
 
 def load_findings(path: str) -> list:
@@ -50,7 +50,7 @@ def main(argv: list[str] | None = None) -> int:
     if args.severity:
         claude_severity = args.severity.upper()
         summary         = f"Severity manually set to {claude_severity}."
-        details         = []
+        details: list[dict] = []
         print(f"⚡ Severity override: {claude_severity}")
     else:
         print("🤖 Analyzing with Claude...")

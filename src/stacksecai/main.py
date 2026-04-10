@@ -6,11 +6,11 @@ Called by action.yml composite step.
 import os
 import sys
 
-from .semgrep_runner import run_semgrep
 from .claude_analyzer import analyze_with_claude
 from .config import load_config
-from .policy_gate import compute_verdict, EXIT_CODES
-from .pr_commenter import post_pr_comment, VERDICT_BADGE
+from .policy_gate import EXIT_CODES, compute_verdict
+from .pr_commenter import VERDICT_BADGE, post_pr_comment
+from .semgrep_runner import run_semgrep
 
 
 def main():

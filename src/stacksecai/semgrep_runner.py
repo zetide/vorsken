@@ -5,9 +5,8 @@ playground の GitHub Actions 相当のコマンド:
   semgrep --config rules/ --include="src/**" --json --output semgrep-results.json || true
 """
 
-import subprocess
 import json
-import os
+import subprocess
 from pathlib import Path
 
 
