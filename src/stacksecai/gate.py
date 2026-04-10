@@ -69,7 +69,7 @@ def main(argv: list[str] | None = None) -> int:
         print("\n--- PR Comment Preview ---")
         print(comment)
     else:
-        print("\n[INFO] Use --no-comment to preview, or set GITHUB_TOKEN to post.")
+        print("\n[INFO] Use --no-comment to preview, or set GITHUB_TOKEN to post.")  # pragma: no cover
 
     # 5. Exit code
     return 1 if verdict == "BLOCK" else 0
