@@ -8,9 +8,11 @@ version = "0.1.0"
 requires-python = ">=3.11"
 dependencies = [
     "anthropic",
+    "httpx>=0.27.0",    # ← 追加（anthropicの内部依存、直接使うので明示）
     "pyyaml",
     "requests",
     "semgrep",
+    "tenacity>=9.0.0",  # ← 追加（Day10 リトライ用）
 ]
 
 [project.optional-dependencies]

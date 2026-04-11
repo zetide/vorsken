@@ -4,7 +4,25 @@ Claude Analyzer: sends Semgrep findings to Claude API and returns severity + sum
 """
 import json
 import os
-import time
+
+from tenacity import (
+    retry,
+    stop_after_attempt,
+    wait_exponential,
+    retry_if_exception_type,
+    before_sleep_log,
+)
+import logging
+
+logger = logging.getLogger(__name__)
+
+import httpx 
+from stacksecai.config import (
+    CLAUDE_TIMEOUT_TOTAL,   # ← 追加
+    CLAUDE_TIMEOUT_CONNECT, # ← 追加
+    CLAUDE_TIMEOUT_READ,    # ← 追加
+    CLAUDE_TIMEOUT_WRITE,   # ← 追加
+)
 
 import anthropic
 from anthropic.types import TextBlock  # ← 追加
@@ -60,6 +78,41 @@ def _build_findings_text(findings: list) -> str:
         lines.append(f"- [{sev}] {rule}: {path}:{line}")
     return "\n".join(lines)
 
+# ── Claude クライアント（モジュールトップレベル）──────────────
+# 遅延初期化（import 時ではなく初回呼び出し時に生成）
+_client: anthropic.Anthropic | None = None
+
+def _get_client() -> anthropic.Anthropic:
+    global _client
+    if _client is None:
+        _client = anthropic.Anthropic(
+            api_key=os.environ["ANTHROPIC_API_KEY"],
+            timeout=httpx.Timeout(
+                timeout=CLAUDE_TIMEOUT_TOTAL,
+                connect=CLAUDE_TIMEOUT_CONNECT,
+                read=CLAUDE_TIMEOUT_READ,
+                write=CLAUDE_TIMEOUT_WRITE,
+            ),
+            max_retries=0,
+        )
+    return _client
+
+_RETRYABLE = (
+    anthropic.RateLimitError,
+    anthropic.APIConnectionError,
+    anthropic.APITimeoutError,
+)
+
+@retry(
+    retry=retry_if_exception_type(_RETRYABLE),
+    stop=stop_after_attempt(3),
+    wait=wait_exponential(multiplier=1, min=2, max=30),
+    before_sleep=before_sleep_log(logger, logging.WARNING),
+    reraise=True,
+)
+def _call_claude(**kwargs):
+    return _get_client().messages.create(**kwargs)  # client → _get_client()
+# ─────────────────────────────────────────────────────────────
 
 def analyze_with_claude(findings: list) -> tuple[str, str, list]:
     """
@@ -69,46 +122,31 @@ def analyze_with_claude(findings: list) -> tuple[str, str, list]:
         (severity, summary, detailed_findings)
         e.g. ("HIGH", "Hardcoded credential detected.", [...])
     """
-    client = anthropic.Anthropic(api_key=os.environ["ANTHROPIC_API_KEY"])
+    
     findings_text = _build_findings_text(findings)
     user_content  = USER_PROMPT_TEMPLATE.format(findings_text=findings_text)
 
-    for attempt in range(MAX_RETRIES):
-        try:
-            message = client.messages.create(
-                model="claude-haiku-4-5",
-                max_tokens=512,
-                system=SYSTEM_PROMPT,
-                messages=[
-                    {"role": "user",      "content": user_content},
-                    {"role": "assistant", "content": "{"},
-                ],
-            )
-            # ✅ 修正: TextBlock のみを対象にする
-            block = message.content[0]
-            if not isinstance(block, TextBlock):  # pragma: no cover
-                raise ValueError(f"Unexpected block type: {type(block)}")  # pragma: no cover
+    try:
+        message = _call_claude(
+            model="claude-haiku-4-5",
+            max_tokens=512,
+            system=SYSTEM_PROMPT,
+            messages=[
+                {"role": "user",      "content": user_content},
+                {"role": "assistant", "content": "{"},
+            ],
+        )
+        block = message.content[0]
+        if not isinstance(block, TextBlock):  # pragma: no cover
+            raise ValueError(f"Unexpected block type: {type(block)}")  # pragma: no cover
 
-            raw  = "{" + block.text.strip()
-            data = json.loads(raw)
+        raw  = "{" + block.text.strip()
+        data = json.loads(raw)
 
-            severity = data.get("severity", "INFO").upper()
-            summary  = data.get("summary", "No summary available.")
-            details: list[dict] = data.get("findings", [])
-            return severity, summary, details
+        severity = data.get("severity", "INFO").upper()
+        summary  = data.get("summary", "No summary available.")
+        details: list[dict] = data.get("findings", [])
+        return severity, summary, details
 
-        except (json.JSONDecodeError, KeyError, ValueError):
-            if attempt == MAX_RETRIES - 1:
-                return "INFO", "Claude response could not be parsed.", []
-            time.sleep(RETRY_DELAY * (attempt + 1))
-
-        except Exception as e:
-            if attempt < MAX_RETRIES - 1:
-                time.sleep(RETRY_DELAY * (attempt + 1))
-            else:
-                raise RuntimeError(
-                    f"Claude API failed after {MAX_RETRIES} attempts: {e}"
-                )
-
-    # ✅ 修正: ループ後の fallback（mypy の Missing return statement 対策）
-    return "INFO", "Claude did not respond.", []  # pragma: no cover
+    except (json.JSONDecodeError, KeyError, ValueError):
+        return "INFO", "Claude response could not be parsed.", []
