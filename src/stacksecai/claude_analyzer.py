@@ -2,30 +2,31 @@
 """
 Claude Analyzer: sends Semgrep findings to Claude API and returns severity + summary.
 """
+from __future__ import annotations
+
 import json
+import logging
 import os
 
+import anthropic
+import httpx
+from anthropic.types import TextBlock
 from tenacity import (
+    before_sleep_log,
     retry,
+    retry_if_exception_type,
     stop_after_attempt,
     wait_exponential,
-    retry_if_exception_type,
-    before_sleep_log,
 )
-import logging
+
+from stacksecai.config import (
+    CLAUDE_TIMEOUT_CONNECT,
+    CLAUDE_TIMEOUT_READ,
+    CLAUDE_TIMEOUT_TOTAL,
+    CLAUDE_TIMEOUT_WRITE,
+)
 
 logger = logging.getLogger(__name__)
-
-import httpx 
-from stacksecai.config import (
-    CLAUDE_TIMEOUT_TOTAL,   # ← 追加
-    CLAUDE_TIMEOUT_CONNECT, # ← 追加
-    CLAUDE_TIMEOUT_READ,    # ← 追加
-    CLAUDE_TIMEOUT_WRITE,   # ← 追加
-)
-
-import anthropic
-from anthropic.types import TextBlock  # ← 追加
 
 MAX_RETRIES = 3
 RETRY_DELAY = 2  # seconds
