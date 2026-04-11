@@ -69,8 +69,3 @@ def load_config(config_path: str = ".stacksecai.yml") -> PolicyConfig:
         severity_flag  = [s.upper() for s in claude.get("severity_flag",  ["MEDIUM"])],
         rule_overrides = overrides,
     )
-# Claude API タイムアウト設定
-CLAUDE_TIMEOUT_TOTAL:   float = 120.0
-CLAUDE_TIMEOUT_CONNECT: float = 5.0
-CLAUDE_TIMEOUT_READ:    float = 90.0
-CLAUDE_TIMEOUT_WRITE:   float = 10.0
