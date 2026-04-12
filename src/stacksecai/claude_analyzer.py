@@ -25,8 +25,7 @@ from stacksecai.config import (
     CLAUDE_TIMEOUT_TOTAL,
     CLAUDE_TIMEOUT_WRITE,
 )
-
-from stacksecai.log_filter import SensitiveFilter   # ← import追加
+from stacksecai.log_filter import SensitiveFilter
 
 logger = logging.getLogger(__name__)
 logger.addFilter(SensitiveFilter())                  # ← 追加
