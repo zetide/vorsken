@@ -26,7 +26,10 @@ from stacksecai.config import (
     CLAUDE_TIMEOUT_WRITE,
 )
 
+from stacksecai.log_filter import SensitiveFilter   # ← import追加
+
 logger = logging.getLogger(__name__)
+logger.addFilter(SensitiveFilter())                  # ← 追加
 
 MAX_RETRIES = 3
 RETRY_DELAY = 2  # seconds
