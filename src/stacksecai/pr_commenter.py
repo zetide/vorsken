@@ -79,6 +79,33 @@ def format_pr_comment(
     ]
     return "\n".join(lines)
 
+# ── 重複チェック用ヘルパー ────────────────────────────────────
+COMMENT_MARKER = "StackSecAI Policy Gate"
+
+
+def _find_existing_comment(
+    list_url: str,
+    headers: dict,
+) -> int | None:
+    """既存の StackSecAI コメントの ID を返す。なければ None。"""
+    page = 1
+    while True:
+        resp = requests.get(
+            list_url,
+            headers=headers,
+            params={"per_page": 100, "page": page},
+        )
+        resp.raise_for_status()
+        comments = resp.json()
+        if not comments:
+            return None
+        for c in comments:
+            if COMMENT_MARKER in c.get("body", ""):
+                return c["id"]
+        if len(comments) < 100:
+            return None
+        page += 1
+# ─────────────────────────────────────────────────────────────
 
 def post_pr_comment(
     verdict: str,
@@ -96,13 +123,21 @@ def post_pr_comment(
         claude_severity, claude_summary, claude_details,
     )
 
-    url = (
-        f"https://api.github.com/repos/{repo}/issues/{pr_num}/comments"
-    )
+    list_url = f"https://api.github.com/repos/{repo}/issues/{pr_num}/comments"
     headers = {
         "Authorization": f"Bearer {token}",
-        "Accept": "application/vnd.github+json",
+        "Accept":        "application/vnd.github+json",
         "X-GitHub-Api-Version": "2022-11-28",
     }
-    resp = requests.post(url, json={"body": body}, headers=headers)
+
+    existing_id = _find_existing_comment(list_url, headers)
+
+    if existing_id:
+        # 既存コメントを更新（重複抑制）
+        url  = f"https://api.github.com/repos/{repo}/issues/comments/{existing_id}"
+        resp = requests.patch(url, json={"body": body}, headers=headers)
+    else:
+        # 新規投稿
+        resp = requests.post(list_url, json={"body": body}, headers=headers)
+
     resp.raise_for_status()
