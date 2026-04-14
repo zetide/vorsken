@@ -50,3 +50,11 @@ class TestSensitiveFilter:
         """Filter は削除せず常に通過させる"""
         record = _make_record("sk-ant-api03-shouldbemaskednot dropped")
         assert self.f.filter(record) is True
+        
+    def test_masks_args_dict(self):
+        """record.args が dict 型のケース"""
+        record = _make_record("key=%(key)s")
+        record.args = {"key": "sk-ant-api03-secretABCDEFG1234567890"}
+        self.f.filter(record)
+        assert "sk-ant-api03-secret" not in str(record.args)
+        assert "sk-ant-***" in str(record.args)

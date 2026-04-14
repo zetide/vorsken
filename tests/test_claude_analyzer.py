@@ -137,3 +137,23 @@ def test_auth_error_does_not_retry(mock_client):
     with pytest.raises(anthropic.AuthenticationError):
         analyze_with_claude([])
     assert mock_client.messages.create.call_count == 1
+
+# ── _get_client() のキャッシュ動作 ─────────────────────────────
+
+class TestGetClient:
+    def setup_method(self):
+        mod._client = None
+
+    def teardown_method(self):
+        mod._client = None
+
+    def test_get_client_creates_instance(self, monkeypatch):
+        monkeypatch.setenv("ANTHROPIC_API_KEY", "sk-ant-test-dummy")
+        client = mod._get_client()
+        assert isinstance(client, anthropic.Anthropic)
+
+    def test_get_client_returns_same_instance(self, monkeypatch):
+        monkeypatch.setenv("ANTHROPIC_API_KEY", "sk-ant-test-dummy")
+        first  = mod._get_client()
+        second = mod._get_client()
+        assert first is second

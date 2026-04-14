@@ -110,3 +110,13 @@ def test_update_existing_comment_when_found(monkeypatch):
     # PATCH URL に comment ID が含まれているか確認
     patch_url = mock_patch.call_args[0][0]
     assert "55" in patch_url
+
+def test_find_existing_paginates_to_next_page():
+    """1ページ目が100件フルで一致なし→2ページ目で発見するケース"""
+    page1 = [{"id": i, "body": "unrelated"} for i in range(100)]  # 100件・一致なし
+    page2 = [{"id": 999, "body": f"## PASS — {COMMENT_MARKER}"}]  # 2ページ目で発見
+
+    responses = [_mock_resp(page1), _mock_resp(page2)]
+    with patch("requests.get", side_effect=responses):
+        result = _find_existing_comment("https://api.github.com/test", {})
+    assert result == 999
