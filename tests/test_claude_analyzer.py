@@ -1,159 +1,341 @@
 # tests/test_claude_analyzer.py
+"""Tests for claude_analyzer — new schema: (verdict, summary, findings, block_reasons)"""
+from __future__ import annotations
+
 import json
 from unittest.mock import MagicMock, patch
 
-import anthropic
 import pytest
+from anthropic import (
+    APIConnectionError,
+    APITimeoutError,
+    AuthenticationError,
+    RateLimitError,
+)
 from anthropic.types import TextBlock
-from tenacity import wait_none
 
 import stacksecai.claude_analyzer as mod
-from stacksecai.claude_analyzer import analyze_with_claude
 
 
-# ── ヘルパー ──────────────────────────────────────────────────
+# ─── helpers ──────────────────────────────────────────────────────────────────
 
-def _mock_message(response_body: str) -> MagicMock:
-    """`"{" + block.text` で完全な JSON になるモックレスポンス"""
-    block = MagicMock(spec=TextBlock)  # isinstance(block, TextBlock) → True
-    block.text = response_body         # 先頭 "{" は analyze_with_claude 側で付加
+def _make_block(text: str) -> MagicMock:
+    block = MagicMock(spec=TextBlock)
+    block.text = text
+    return block
+
+
+def _make_message(text: str) -> MagicMock:
     msg = MagicMock()
-    msg.content = [block]
+    msg.content = [_make_block(text)]
     return msg
 
 
-def _valid_body() -> str:
-    """"{" を除いた有効な JSON ボディ"""
+def _response(verdict="PASS", summary="OK", findings=None, block_reasons=None) -> str:
+    """prefill パターン用: raw = "{" + block.text で復元される"""
     data = {
-        "severity": "HIGH",
-        "summary": "Hardcoded credential detected.",
-        "findings": [
-            {"rule_id": "hardcoded-password", "line": 10, "explanation": "risk", "fix": "fix it"}
-        ],
+        "verdict": verdict,
+        "summary": summary,
+        "findings": findings or [],
+        "block_reasons": block_reasons or [],
     }
-    return json.dumps(data)[1:]  # 先頭の "{" を除く
+    full = json.dumps(data)
+    return full[1:]  # "{" を除いた残り
 
 
-# ── フィクスチャ ──────────────────────────────────────────────
+# ─── SYSTEM_PROMPT ────────────────────────────────────────────────────────────
 
-@pytest.fixture(autouse=True)
-def no_retry_wait():
-    """テスト中はバックオフ待機をゼロにする（2〜30秒待たない）"""
-    original = mod._call_claude.retry.wait
-    mod._call_claude.retry.wait = wait_none()
-    yield
-    mod._call_claude.retry.wait = original
+class TestSystemPrompt:
+    def test_is_string(self):
+        assert isinstance(mod.SYSTEM_PROMPT, str) and len(mod.SYSTEM_PROMPT) > 0
 
+    def test_english_instruction(self):
+        assert "English" in mod.SYSTEM_PROMPT
 
-@pytest.fixture()
-def mock_client():
-    """_get_client() が返すモッククライアントを差し替え"""
-    with patch("stacksecai.claude_analyzer._get_client") as p:
-        client = MagicMock()
-        p.return_value = client
-        yield client
+    def test_verdict_values(self):
+        for v in ("BLOCK", "FLAG", "PASS"):
+            assert v in mod.SYSTEM_PROMPT
 
+    def test_owasp_reference(self):
+        assert "owasp_category" in mod.SYSTEM_PROMPT or "OWASP" in mod.SYSTEM_PROMPT
 
-# ── 正常系 ────────────────────────────────────────────────────
+    def test_no_hallucinate(self):
+        assert "hallucinate" in mod.SYSTEM_PROMPT.lower()
 
-def test_analyze_returns_severity_and_summary(mock_client):
-    mock_client.messages.create.return_value = _mock_message(_valid_body())
-    severity, summary, findings = analyze_with_claude([{"check_id": "rule.test"}])
-    assert severity == "HIGH"
-    assert "credential" in summary
-    assert len(findings) == 1
+    def test_json_only(self):
+        assert "JSON" in mod.SYSTEM_PROMPT
 
+    def test_block_reasons(self):
+        assert "block_reasons" in mod.SYSTEM_PROMPT
 
-def test_analyze_empty_findings_no_error(mock_client):
-    body = json.dumps({"severity": "INFO", "summary": "No issues.", "findings": []})[1:]
-    mock_client.messages.create.return_value = _mock_message(body)
-    severity, summary, findings = analyze_with_claude([])
-    assert severity == "INFO"
-    assert findings == []
+    def test_syntax_ok(self):
+        import ast, inspect
+        ast.parse(inspect.getsource(mod))
 
 
-# ── JSON パースエラー ─────────────────────────────────────────
+# ─── USER_PROMPT_TEMPLATE ─────────────────────────────────────────────────────
 
-def test_invalid_json_returns_fallback():
-    with patch("stacksecai.claude_analyzer._call_claude") as mock_call:
-        block = MagicMock(spec=TextBlock)
-        block.text = "not valid json at all}"
+class TestUserPromptTemplate:
+    def test_has_placeholder(self):
+        assert "{findings_text}" in mod.USER_PROMPT_TEMPLATE
+
+    def test_format(self):
+        result = mod.USER_PROMPT_TEMPLATE.format(findings_text="test-finding")
+        assert "test-finding" in result
+
+
+# ─── analyze_with_claude: 正常系 ──────────────────────────────────────────────
+
+class TestAnalyzeHappyPath:
+
+    @patch("stacksecai.claude_analyzer._call_claude")
+    def test_block_verdict(self, mock_call):
+        mock_call.return_value = _make_message(_response(
+            verdict="BLOCK",
+            summary="Hardcoded credential detected.",
+            findings=[{
+                "rule_id": "hardcoded-api-key",
+                "owasp_category": "API8:2023 - Security Misconfiguration",
+                "severity": "HIGH",
+                "message": "Hardcoded API key found.",
+                "recommendation": "Use environment variables.",
+            }],
+            block_reasons=["hardcoded-api-key"],
+        ))
+        verdict, summary, findings, block_reasons = mod.analyze_with_claude(
+            [{"check_id": "hardcoded-api-key"}]
+        )
+        assert verdict == "BLOCK"
+        assert summary != ""
+        assert len(findings) == 1
+        assert findings[0]["rule_id"] == "hardcoded-api-key"
+        assert findings[0]["owasp_category"] == "API8:2023 - Security Misconfiguration"
+        assert block_reasons == ["hardcoded-api-key"]
+
+    @patch("stacksecai.claude_analyzer._call_claude")
+    def test_flag_verdict(self, mock_call):
+        mock_call.return_value = _make_message(_response(
+            verdict="FLAG",
+            summary="Medium severity SSRF risk.",
+            findings=[{
+                "rule_id": "ssrf-risk",
+                "owasp_category": "API7:2023 - Server Side Request Forgery",
+                "severity": "MEDIUM",
+                "message": "Possible SSRF via user-controlled URL.",
+                "recommendation": "Validate and whitelist URLs.",
+            }],
+        ))
+        verdict, summary, findings, block_reasons = mod.analyze_with_claude(
+            [{"check_id": "ssrf-risk"}]
+        )
+        assert verdict == "FLAG"
+        assert block_reasons == []
+        assert findings[0]["severity"] == "MEDIUM"
+
+    @patch("stacksecai.claude_analyzer._call_claude")
+    def test_pass_verdict(self, mock_call):
+        mock_call.return_value = _make_message(_response(
+            verdict="PASS", summary="No issues found."
+        ))
+        verdict, summary, findings, block_reasons = mod.analyze_with_claude([])
+        assert verdict == "PASS"
+        assert findings == []
+        assert block_reasons == []
+
+    @patch("stacksecai.claude_analyzer._call_claude")
+    def test_verdict_uppercased(self, mock_call):
+        mock_call.return_value = _make_message(_response(verdict="block"))
+        verdict, _, _, _ = mod.analyze_with_claude([{}])
+        assert verdict == "BLOCK"
+
+    @patch("stacksecai.claude_analyzer._call_claude")
+    def test_multiple_findings(self, mock_call):
+        mock_call.return_value = _make_message(_response(
+            verdict="BLOCK",
+            findings=[
+                {"rule_id": "eval-injection", "owasp_category": "N/A",
+                 "severity": "CRITICAL", "message": "eval() called.", "recommendation": "Remove eval()."},
+                {"rule_id": "sql-injection", "owasp_category": "N/A",
+                 "severity": "HIGH", "message": "SQL injection.", "recommendation": "Use parameterized queries."},
+            ],
+            block_reasons=["eval-injection", "sql-injection"],
+        ))
+        verdict, _, findings, block_reasons = mod.analyze_with_claude([{}, {}])
+        assert verdict == "BLOCK"
+        assert len(findings) == 2
+        assert len(block_reasons) == 2
+
+    @patch("stacksecai.claude_analyzer._call_claude")
+    def test_owasp_na(self, mock_call):
+        mock_call.return_value = _make_message(_response(
+            verdict="FLAG",
+            findings=[{
+                "rule_id": "subprocess-shell-true", "owasp_category": "N/A",
+                "severity": "MEDIUM", "message": "shell=True.", "recommendation": "Avoid shell=True.",
+            }],
+        ))
+        _, _, findings, _ = mod.analyze_with_claude([{}])
+        assert findings[0]["owasp_category"] == "N/A"
+
+
+# ─── analyze_with_claude: フォールバック ──────────────────────────────────────
+
+class TestAnalyzeFallback:
+
+    @patch("stacksecai.claude_analyzer._call_claude")
+    def test_invalid_json_fallback(self, mock_call):
+        mock_call.return_value = _make_message("this is not valid json}")
+        verdict, summary, findings, block_reasons = mod.analyze_with_claude([{}])
+        assert verdict == "INFO"
+        assert findings == []
+        assert block_reasons == []
+
+    @patch("stacksecai.claude_analyzer._call_claude")
+    def test_non_textblock_fallback(self, mock_call):
         msg = MagicMock()
-        msg.content = [block]
+        msg.content = [MagicMock()]  # spec=TextBlock なし
         mock_call.return_value = msg
-        severity, summary, findings = analyze_with_claude([])
-    assert severity == "INFO"
-    assert summary == "Claude response could not be parsed."
-    assert findings == []
+        verdict, summary, findings, block_reasons = mod.analyze_with_claude([{}])
+        assert verdict == "INFO"
+        assert findings == []
+
+    @patch("stacksecai.claude_analyzer._call_claude")
+    def test_rate_limit_fallback(self, mock_call):
+        mock_call.side_effect = RateLimitError(
+            message="rate limited",
+            response=MagicMock(status_code=429, headers={}),
+            body=None,
+        )
+        verdict, summary, findings, block_reasons = mod.analyze_with_claude([{}])
+        assert verdict == "INFO"
+        assert findings == []
+
+    @patch("stacksecai.claude_analyzer._call_claude")
+    def test_auth_error_fallback(self, mock_call):
+        mock_call.side_effect = AuthenticationError(
+            message="invalid api key",
+            response=MagicMock(status_code=401, headers={}),
+            body=None,
+        )
+        verdict, _, findings, _ = mod.analyze_with_claude([{}])
+        assert verdict == "INFO"
 
 
-# ── リトライ系（_RETRYABLE 対象）────────────────────────────────
+# ─── _call_claude: リトライ ───────────────────────────────────────────────────
 
-def test_rate_limit_retries_3_times(mock_client):
-    mock_client.messages.create.side_effect = anthropic.RateLimitError(
-        message="rate limited", response=MagicMock(), body={}
-    )
-    with pytest.raises(anthropic.RateLimitError):
-        analyze_with_claude([])
-    assert mock_client.messages.create.call_count == 3
+class TestCallClaudeRetry:
+
+    @patch("stacksecai.claude_analyzer._get_client")
+    def test_rate_limit_retries_3(self, mock_get_client):
+        client = MagicMock()
+        mock_get_client.return_value = client
+        client.messages.create.side_effect = RateLimitError(
+            message="rate limited",
+            response=MagicMock(status_code=429, headers={}),
+            body=None,
+        )
+        with pytest.raises(RateLimitError):
+            mod._call_claude(model="claude-haiku-4-5", max_tokens=512,
+                             system="sys", messages=[{"role": "user", "content": "t"}])
+        assert client.messages.create.call_count == mod.MAX_RETRIES
+
+    @patch("stacksecai.claude_analyzer._get_client")
+    def test_connection_error_retries(self, mock_get_client):
+        client = MagicMock()
+        mock_get_client.return_value = client
+        client.messages.create.side_effect = APIConnectionError(
+            message="conn failed", request=MagicMock()
+        )
+        with pytest.raises(APIConnectionError):
+            mod._call_claude(model="claude-haiku-4-5", max_tokens=512,
+                             system="sys", messages=[{"role": "user", "content": "t"}])
+        assert client.messages.create.call_count == mod.MAX_RETRIES
+
+    @patch("stacksecai.claude_analyzer._get_client")
+    def test_timeout_retries(self, mock_get_client):
+        client = MagicMock()
+        mock_get_client.return_value = client
+        client.messages.create.side_effect = APITimeoutError(request=MagicMock())
+        with pytest.raises(APITimeoutError):
+            mod._call_claude(model="claude-haiku-4-5", max_tokens=512,
+                             system="sys", messages=[{"role": "user", "content": "t"}])
+        assert client.messages.create.call_count == mod.MAX_RETRIES
+
+    @patch("stacksecai.claude_analyzer._get_client")
+    def test_auth_error_no_retry(self, mock_get_client):
+        client = MagicMock()
+        mock_get_client.return_value = client
+        client.messages.create.side_effect = AuthenticationError(
+            message="invalid key",
+            response=MagicMock(status_code=401, headers={}),
+            body=None,
+        )
+        with pytest.raises(AuthenticationError):
+            mod._call_claude(model="claude-haiku-4-5", max_tokens=512,
+                             system="sys", messages=[{"role": "user", "content": "t"}])
+        assert client.messages.create.call_count == 1
+
+    @patch("stacksecai.claude_analyzer._get_client")
+    def test_success_on_second_attempt(self, mock_get_client):
+        client = MagicMock()
+        mock_get_client.return_value = client
+        good = _make_message(_response(verdict="PASS"))
+        client.messages.create.side_effect = [
+            RateLimitError(
+                message="rate limited",
+                response=MagicMock(status_code=429, headers={"retry-after": "0"}),
+                body=None,
+            ),
+            good,
+        ]
+        result = mod._call_claude(model="claude-haiku-4-5", max_tokens=512,
+                                  system="sys", messages=[{"role": "user", "content": "t"}])
+        assert result is good
+        assert client.messages.create.call_count == 2
 
 
-def test_connection_error_retries_3_times(mock_client):
-    mock_client.messages.create.side_effect = anthropic.APIConnectionError(
-        request=MagicMock()
-    )
-    with pytest.raises(anthropic.APIConnectionError):
-        analyze_with_claude([])
-    assert mock_client.messages.create.call_count == 3
-
-
-def test_timeout_retries_3_times(mock_client):
-    mock_client.messages.create.side_effect = anthropic.APITimeoutError(
-        request=MagicMock()
-    )
-    with pytest.raises(anthropic.APITimeoutError):
-        analyze_with_claude([])
-    assert mock_client.messages.create.call_count == 3
-
-
-def test_succeeds_on_second_attempt(mock_client):
-    """1回失敗→2回目で成功するケース"""
-    mock_client.messages.create.side_effect = [
-        anthropic.APIConnectionError(request=MagicMock()),
-        _mock_message(_valid_body()),
-    ]
-    severity, summary, _ = analyze_with_claude([])
-    assert severity == "HIGH"
-    assert mock_client.messages.create.call_count == 2
-
-
-# ── リトライしない例外（4xx クライアントエラー）──────────────────
-
-def test_auth_error_does_not_retry(mock_client):
-    """AuthenticationError は即失敗（リトライなし）"""
-    mock_client.messages.create.side_effect = anthropic.AuthenticationError(
-        message="invalid key", response=MagicMock(), body={}
-    )
-    with pytest.raises(anthropic.AuthenticationError):
-        analyze_with_claude([])
-    assert mock_client.messages.create.call_count == 1
-
-# ── _get_client() のキャッシュ動作 ─────────────────────────────
+# ─── _get_client ──────────────────────────────────────────────────────────────
 
 class TestGetClient:
-    def setup_method(self):
-        mod._client = None
 
-    def teardown_method(self):
-        mod._client = None
+    def test_creates_instance(self):
+        with patch.dict("os.environ", {"ANTHROPIC_API_KEY": "sk-ant-test-dummy"}):
+            mod._client = None
+            client = mod._get_client()
+            assert client is not None
 
-    def test_get_client_creates_instance(self, monkeypatch):
-        monkeypatch.setenv("ANTHROPIC_API_KEY", "sk-ant-test-dummy")
-        client = mod._get_client()
-        assert isinstance(client, anthropic.Anthropic)
+    def test_caches_instance(self):
+        with patch.dict("os.environ", {"ANTHROPIC_API_KEY": "sk-ant-test-dummy"}):
+            mod._client = None
+            c1 = mod._get_client()
+            c2 = mod._get_client()
+            assert c1 is c2
 
-    def test_get_client_returns_same_instance(self, monkeypatch):
-        monkeypatch.setenv("ANTHROPIC_API_KEY", "sk-ant-test-dummy")
-        first  = mod._get_client()
-        second = mod._get_client()
-        assert first is second
+
+# ─── _build_findings_text ─────────────────────────────────────────────────────
+
+class TestBuildFindingsText:
+
+    def test_empty_returns_string(self):
+        result = mod._build_findings_text([])
+        assert isinstance(result, str)
+
+    def test_single_finding_has_rule_id(self):
+        finding = {
+            "check_id": "hardcoded-password",
+            "path": "src/app.py",
+            "start": {"line": 42},
+            "extra": {"message": "Password found", "severity": "HIGH"},
+        }
+        result = mod._build_findings_text([finding])
+        assert "hardcoded-password" in result or "app.py" in result
+
+    def test_multiple_findings_all_included(self):
+        findings = [
+            {"check_id": f"rule-{i}", "path": "app.py",
+             "start": {"line": i}, "extra": {"message": "msg", "severity": "HIGH"}}
+            for i in range(3)
+        ]
+        result = mod._build_findings_text(findings)
+        for i in range(3):
+            assert f"rule-{i}" in result

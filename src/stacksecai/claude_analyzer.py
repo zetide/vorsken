@@ -1,6 +1,6 @@
 # src/stacksecai/claude_analyzer.py
 """
-Claude Analyzer: sends Semgrep findings to Claude API and returns severity + summary.
+Claude Analyzer: sends Semgrep findings to Claude API and returns verdict + summary.
 """
 from __future__ import annotations
 
@@ -28,44 +28,40 @@ from stacksecai.config import (
 from stacksecai.log_filter import SensitiveFilter
 
 logger = logging.getLogger(__name__)
-logger.addFilter(SensitiveFilter())                  # ← 追加
+logger.addFilter(SensitiveFilter())  # mask sensitive values in logs
 
 MAX_RETRIES = 3
 RETRY_DELAY = 2  # seconds
 
-SYSTEM_PROMPT = """\
-You are a security-focused code reviewer embedded in a CI/CD policy gate.
-Analyze the provided Semgrep findings and respond ONLY with a JSON object.
-Do NOT include prose, markdown fences, or any text outside the JSON.
+SYSTEM_PROMPT = (
+    "You are a security-focused code reviewer embedded in a CI/CD policy gate "
+    "for API security analysis.\n\n"
+    "Analyze the provided Semgrep findings and respond ONLY with a valid JSON object.\n"
+    "Do NOT include prose, markdown fences, or any text outside the JSON.\n"
+    "ALL text fields in your response MUST be written in English.\n\n"
+    "Verdict Rules:\n"
+    "- BLOCK : Any finding with severity CRITICAL or HIGH\n"
+    "- FLAG  : Any finding with severity MEDIUM, or LOW findings involving auth/secrets\n"
+    "- PASS  : No findings, or only INFO-level noise\n\n"
+    "Output Schema (strict, no extra keys):\n"
+    '{"verdict":"BLOCK|FLAG|PASS","summary":"<English summary>",'
+    '"findings":[{"rule_id":"<id>","owasp_category":"<API1:2023... or N/A>",'
+    '"severity":"CRITICAL|HIGH|MEDIUM|LOW|INFO",'
+    '"message":"<English description>","recommendation":"<English fix>"}],'
+    '"block_reasons":["<rule_id>"]}\n\n'
+    "Notes:\n"
+    "- block_reasons must be [] when verdict is FLAG or PASS.\n"
+    "- findings must be [] when verdict is PASS.\n"
+    "- Do NOT hallucinate findings. Only report what Semgrep detected.\n"
+)
 
-Output schema:
-{
-  "severity": "CRITICAL | HIGH | MEDIUM | LOW | INFO",
-  "summary": "<one-sentence risk summary>",
-  "findings": [
-    {
-      "rule_id": "<semgrep rule id>",
-      "line": <int or null>,
-      "explanation": "<why this is a security risk>",
-      "fix": "<concrete remediation in one sentence>"
-    }
-  ]
-}
+USER_PROMPT_TEMPLATE = """## Semgrep Findings (JSON)
 
-Severity selection criteria:
-- CRITICAL : exploitable RCE, auth bypass, exposed private keys
-- HIGH     : SSRF, SQL/command injection, hardcoded credentials
-- MEDIUM   : insecure defaults, weak crypto, overly permissive CORS
-- LOW      : code quality risks with minor security implications
-- INFO     : informational, no direct exploitability
-"""
-
-USER_PROMPT_TEMPLATE = """\
-<semgrep_findings>
+```json
 {findings_text}
-</semgrep_findings>
+```
 
-Evaluate the findings above and return JSON only.
+Evaluate the above findings and return the verdict JSON as specified.
 """
 
 
@@ -81,9 +77,10 @@ def _build_findings_text(findings: list) -> str:
         lines.append(f"- [{sev}] {rule}: {path}:{line}")
     return "\n".join(lines)
 
-# ── Claude クライアント（モジュールトップレベル）──────────────
-# 遅延初期化（import 時ではなく初回呼び出し時に生成）
+
+# ── Claude client (lazy initialization) ──────────────────────────────────────
 _client: anthropic.Anthropic | None = None
+
 
 def _get_client() -> anthropic.Anthropic:
     global _client
@@ -100,11 +97,13 @@ def _get_client() -> anthropic.Anthropic:
         )
     return _client
 
+
 _RETRYABLE = (
     anthropic.RateLimitError,
     anthropic.APIConnectionError,
     anthropic.APITimeoutError,
 )
+
 
 @retry(
     retry=retry_if_exception_type(_RETRYABLE),
@@ -114,18 +113,17 @@ _RETRYABLE = (
     reraise=True,
 )
 def _call_claude(**kwargs):
-    return _get_client().messages.create(**kwargs)  # client → _get_client()
-# ─────────────────────────────────────────────────────────────
+    return _get_client().messages.create(**kwargs)
 
-def analyze_with_claude(findings: list) -> tuple[str, str, list]:
+
+def analyze_with_claude(findings: list) -> tuple[str, str, list, list]:
     """
     Args:
         findings: list of Semgrep finding dicts
     Returns:
-        (severity, summary, detailed_findings)
-        e.g. ("HIGH", "Hardcoded credential detected.", [...])
+        (verdict, summary, detailed_findings, block_reasons)
+        e.g. ("BLOCK", "Hardcoded credential detected.", [...], ["rule-id"])
     """
-    
     findings_text = _build_findings_text(findings)
     user_content  = USER_PROMPT_TEMPLATE.format(findings_text=findings_text)
 
@@ -146,10 +144,12 @@ def analyze_with_claude(findings: list) -> tuple[str, str, list]:
         raw  = "{" + block.text.strip()
         data = json.loads(raw)
 
-        severity = data.get("severity", "INFO").upper()
-        summary  = data.get("summary", "No summary available.")
+        verdict       = data.get("verdict", "INFO").upper()
+        summary       = data.get("summary", "No summary available.")
         details: list[dict] = data.get("findings", [])
-        return severity, summary, details
+        block_reasons: list[str] = data.get("block_reasons", [])
+        return verdict, summary, details, block_reasons
 
-    except (json.JSONDecodeError, KeyError, ValueError):
-        return "INFO", "Claude response could not be parsed.", []
+    except Exception:
+        logger.warning("analyze_with_claude error", exc_info=True)
+        return "INFO", "Claude response could not be parsed.", [], []
