@@ -1,0 +1,39 @@
+project:
+  id: ssai
+  name: "StackSecAI"
+  repo: "https://github.com/stacksecai/stacksecai-dev"
+
+days:
+  - ssai_day_id: ssai-m2-w3-d15
+    date: 2026-04-16
+    label: M2-Day15
+    month: M2
+    week: W3
+    theme: "Claudeプロンプト英語化 + 文字化けクリーンアップ"
+    tasks:
+      - id: ssai-m2-w3-d15-system-prompt
+        title: "SYSTEM_PROMPT英語化"
+        status: todo
+      - id: ssai-m2-w3-d15-remove-japanese
+        title: "日本語コメント除去"
+        status: todo
+
+month2_tasks:
+  - id: m2-task-1
+    title: "Claudeプロンプトを英語出力に統一"
+    status: todo
+  - id: m2-task-2
+    title: "vulnerable_sample.py に OWASP Top10 全10項目追加"
+    status: todo
+  - id: m2-task-3
+    title: "各項目対応 Semgrep ルール（rules/）整備"
+    status: todo
+  - id: m2-task-4
+    title: "エラーハンドリング・ロギング強化（本番品質）"
+    status: done
+  - id: m2-task-5
+    title: "README.md 英語初稿"
+    status: todo
+  - id: m2-task-6
+    title: "コミット・Issue・PR運用を英語に統一"
+    status: todo
