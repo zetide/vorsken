@@ -1,0 +1,10 @@
+﻿rules:
+  - id: api4-fetchall-no-limit
+    pattern: |
+      $DB.execute($QUERY).fetchall()
+    message: "[API4:2023] fetchall() with no LIMIT. Add pagination to prevent unbounded responses."
+    languages: [python]
+    severity: MEDIUM
+    metadata:
+      owasp: "API4:2023 - Unrestricted Resource Consumption"
+      cwe: "CWE-770"

@@ -1,0 +1,10 @@
+﻿rules:
+  - id: api8-debug-true
+    pattern: |
+      DEBUG = True
+    message: "[API8:2023] DEBUG=True in production code. Use env var."
+    languages: [python]
+    severity: HIGH
+    metadata:
+      owasp: "API8:2023 - Security Misconfiguration"
+      cwe: "CWE-94"

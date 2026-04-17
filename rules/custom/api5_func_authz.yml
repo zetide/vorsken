@@ -1,0 +1,15 @@
+﻿rules:
+  - id: api5-missing-role-check
+    patterns:
+      - pattern: |
+          if not $USER.get("logged_in"):
+              raise ...
+      - pattern-not-inside: |
+          if $USER.get("role") == ...:
+              ...
+    message: "[API5:2023] Only login state checked, not role. Add role-based authorization."
+    languages: [python]
+    severity: HIGH
+    metadata:
+      owasp: "API5:2023 - Broken Function Level Authorization"
+      cwe: "CWE-285"

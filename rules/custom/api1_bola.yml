@@ -1,0 +1,10 @@
+﻿rules:
+  - id: api1-bola-fstring-sql
+    pattern: |
+      $DB.execute(f"...{$ID}...")
+    message: "[API1:2023 - BOLA] SQL built with f-string and user ID. Add ownership check."
+    languages: [python]
+    severity: HIGH
+    metadata:
+      owasp: "API1:2023 - Broken Object Level Authorization"
+      cwe: "CWE-639"

@@ -1,0 +1,9 @@
+﻿rules:
+  - id: api6-purchase-no-rate-limit
+    pattern-regex: 'INSERT INTO orders'
+    message: "[API6:2023] Order insert with no rate limiting or bot protection."
+    languages: [python]
+    severity: MEDIUM
+    metadata:
+      owasp: "API6:2023 - Unrestricted Access to Sensitive Business Flows"
+      cwe: "CWE-799"

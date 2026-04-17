@@ -1,0 +1,10 @@
+﻿rules:
+  - id: api2-jwt-manual-decode
+    pattern: |
+      $TOKEN.split(".")[$IDX]
+    message: "[API2:2023] JWT decoded manually without signature verification. Use jwt.decode() with secret."
+    languages: [python]
+    severity: HIGH
+    metadata:
+      owasp: "API2:2023 - Broken Authentication"
+      cwe: "CWE-345"

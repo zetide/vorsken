@@ -1,0 +1,9 @@
+﻿rules:
+  - id: api3-password-hash-in-select
+    pattern-regex: 'password_hash'
+    message: "[API3:2023] password_hash exposed in query. Exclude sensitive fields from response."
+    languages: [python]
+    severity: MEDIUM
+    metadata:
+      owasp: "API3:2023 - Broken Object Property Level Authorization"
+      cwe: "CWE-213"

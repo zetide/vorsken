@@ -1,0 +1,9 @@
+﻿rules:
+  - id: api9-legacy-v1-route
+    pattern-regex: '\.route\s*\(\s*["'']/api/v1/'
+    message: "[API9:2023] Legacy v1 endpoint still active. Remove or deprecate."
+    languages: [python]
+    severity: MEDIUM
+    metadata:
+      owasp: "API9:2023 - Improper Inventory Management"
+      cwe: "CWE-1059"
