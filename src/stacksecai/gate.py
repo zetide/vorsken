@@ -54,7 +54,7 @@ def main(argv: list[str] | None = None) -> int:
         print(f"⚡ Severity override: {claude_severity}")
     else:
         print("🤖 Analyzing with Claude...")
-        claude_severity, summary, details = analyze_with_claude(findings)
+        claude_severity, summary, details, block_reasons = analyze_with_claude(findings)
         print(f"   Claude severity: {claude_severity}")
 
     # 3. Compute verdict
