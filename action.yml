@@ -1,7 +1,7 @@
 $content = @"
 name: 'stacksecai Policy Gate'
 description: 'Enforce security policies on PRs via Semgrep + Claude AI. Returns BLOCK / FLAG / PASS.'
-author: 'rilvak'
+author: 'vorsken'
 
 branding:
   icon: 'shield'
