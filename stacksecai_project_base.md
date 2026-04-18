@@ -12,7 +12,9 @@
 
 ### 背景
 
-セキュリティSaaS「StackSecAI（仮称）」を個人開発中。
+セキュリティSaaS「StackSecAI」を個人開発中。
+開発者ブランド：**vorsken**（GitHub Org・ドメイン取得済み）
+親ブランド候補：**zetide**（OSS公開時に再検討予定・非公開）
 3レイヤー構成（AI Code / API Runtime / Compliance）の最初のOSS。
 
 ### コンセプト
@@ -239,8 +241,8 @@ dependencies = [
 | 2   | vulnerable_sample.py に OWASP Top10 全10項目追加 | ✅ 完了（Day16） |
 | 3   | 各項目対応 Semgrep ルール（rules/）整備          | ✅ 完了（Day16） |
 | 4   | エラーハンドリング・ロギング強化（本番品質）     | ✅ W2完了        |
-| 5   | README.md 英語初稿                               | ⬜ Day17         |
-| 6   | コミット・Issue・PR運用を英語に統一              | ⬜ Day17         |
+| 5   | README.md 英語初稿                               | ✅ 完了（Day17） |
+| 6   | コミット・Issue・PR運用を英語に統一              | ✅ 完了（Day17） |
 
 ### M2 Week 別サマリー
 
@@ -262,6 +264,14 @@ dependencies = [
 - vulnerable_sample.py OWASP API Top10 全10項目追加
 - rules/custom/ 対応ルール10本整備・Semgrep 11 findings 確認
 
+**Week3（Day17）**: READMEおよびブランド整備
+
+- README.md 英語版完成・上書き（`Built by vorsken` クレジット）
+- `action.yml` / README の author を `rilvak` → `vorsken` に更新
+- `gate.py` アンパックバグ修正（`block_reasons` 4値化）
+- `tests/test_e2e.py` MOCK*CLAUDE*\* 全3定数を4値タプルに更新
+- CI グリーン確認済み ✅
+
 ### M2 技術メモ（Day15〜）
 
 - `analyze_with_claude` 戻り値: `(verdict, summary, findings, block_reasons)` 4タプル
@@ -278,13 +288,13 @@ dependencies = [
 
 テーマ：**OSS公開準備**
 
-| Day      | テーマ                                           | 主なタスク                                              |
-| -------- | ------------------------------------------------ | ------------------------------------------------------- |
-| Day15 ✅ | Claudeプロンプト英語化 + 文字化けクリーンアップ  | SYSTEM_PROMPT刷新・新スキーマ・30テスト・cov100%        |
-| Day16 ✅ | OWASP API Top10 サンプルコード + ルール整備       | vulnerable_sample.py + rules/custom/ 10本・11 findings  |
-| Day17    | README.md 英語初稿                               | What/How/QuickStart/Config/Coverage table               |
-| Day18-19 | action.yml 整備・E2E確認                         | Marketplace 公開要件確認・E2E テスト                    |
-| Day20    | バッファ + Week4スコープ確定                     | CHANGELOG・MIT確認・英語運用切り替え                    |
+| Day      | テーマ                                          | 主なタスク                                             |
+| -------- | ----------------------------------------------- | ------------------------------------------------------ |
+| Day15 ✅ | Claudeプロンプト英語化 + 文字化けクリーンアップ | SYSTEM_PROMPT刷新・新スキーマ・30テスト・cov100%       |
+| Day16 ✅ | OWASP API Top10 サンプルコード + ルール整備     | vulnerable_sample.py + rules/custom/ 10本・11 findings |
+| Day17 ✅ | README.md 英語初稿 + ブランド整備               | README上書き・author vorsken統一・バグ修正・CI✅       |
+| Day18-19 | action.yml 整備・E2E確認                        | Marketplace 公開要件確認・E2E テスト                   |
+| Day20    | バッファ + Week4スコープ確定                    | CHANGELOG・MIT確認・英語運用切り替え                   |
 
 ### Week3 終了時ゴール
 
@@ -345,6 +355,7 @@ DayXX開始
 ## 14. 毎日の運用フロー
 
 ### 開発中
+
 - 普通に DayXX を進める
 - Notion 用まとめ・ベースファイル更新は1日の終わりにまとめてやる
 
@@ -357,6 +368,7 @@ DayXX開始
 ```
 
 このチャットが返すもの：
+
 1. Notion 用の今日のまとめ
 2. `stacksecai_project_base.md` の before/after パッチ
 
@@ -369,8 +381,8 @@ DayXX開始
 
 ### status の値
 
-| 値     | 意味         | アイコン |
-| ------ | ------------ | -------- |
-| todo   | 未着手       | ⬜       |
-| doing  | 進行中       | 🔄       |
-| done   | 完了         | ✅       |
+| 値    | 意味   | アイコン |
+| ----- | ------ | -------- |
+| todo  | 未着手 | ⬜       |
+| doing | 進行中 | 🔄       |
+| done  | 完了   | ✅       |
