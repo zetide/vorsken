@@ -33,9 +33,9 @@ FINDINGS_WARNING = [
     }
 ]
 
-MOCK_CLAUDE_HIGH = ("HIGH", "Hardcoded credential detected.", [])
-MOCK_CLAUDE_LOW  = ("LOW",  "No significant risk detected.",  [])
-MOCK_CLAUDE_MED  = ("MEDIUM", "Potential SSRF risk.",         [])
+MOCK_CLAUDE_HIGH = ("HIGH",   "Hardcoded credential detected.", [], [])
+MOCK_CLAUDE_LOW  = ("LOW",    "No significant risk detected.",  [], [])
+MOCK_CLAUDE_MED  = ("MEDIUM", "Potential SSRF risk.",           [], [])
 
 
 # ── E2E-1: Semgrep ERROR + Claude HIGH → BLOCK ────────────────────────────
