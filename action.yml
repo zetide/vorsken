@@ -14,7 +14,7 @@ inputs:
   semgrep-rules:
     description: 'Path to Semgrep rules directory'
     required: false
-    default: 'rules/custom'
+    default: '${{ github.action_path }}/rules/custom'
   block-on-error:
     description: 'Exit code 1 on BLOCK verdict (blocks merge if required check)'
     required: false
