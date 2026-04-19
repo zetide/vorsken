@@ -27,14 +27,25 @@ Anthropic の auto-fix の「前段でポリシーを強制する層」として
 
 ## 2. リポジトリ情報
 
-| 項目               | 内容                                         |
-| ------------------ | -------------------------------------------- |
-| リポジトリ         | https://github.com/stacksecai/stacksecai-dev |
-| ローカルパス       | C:\dev\stacksecai-dev                        |
-| Python（ローカル） | 3.14.3                                       |
-| Python（CI）       | 3.11                                         |
-| パッケージ構成     | src/stacksecai/ 以下                         |
-| ブランチ運用       | main ブランチへ直 push（現状）               |
+| 項目               | 内容                                               |
+| ------------------ | -------------------------------------------------- |
+| リポジトリ         | https://github.com/stacksecai/stacksecai-dev       |
+| ローカルパス       | C:\dev\stacksecai-dev                              |
+| Python（ローカル） | 3.14.3                                             |
+| Python（CI）       | 3.11                                               |
+| パッケージ構成     | src/stacksecai/ 以下                               |
+| ブランチ運用       | main ブランチへ直 push（現状）                     |
+| Org transfer 予定  | OSS公開直前（5月頭）に mip-ai → vorsken org へ移管 |
+
+### ブランド・Org 方針
+
+| 項目           | 内容                                                       |
+| -------------- | ---------------------------------------------------------- |
+| 開発者ブランド | **vorsken**（GitHub Org・ドメイン取得済み・非公開）        |
+| 親ブランド候補 | **zetide**（OSS公開時に再検討・非公開）                    |
+| 現アカウント   | mip-ai 配下で開発継続                                      |
+| repo transfer  | OSS公開直前（5月頭）に `vorsken/stacksecai-dev` へ移管予定 |
+| transfer 備考  | GitHub の自動リダイレクトあり・CI/CD 引き継ぎ可能          |
 
 ---
 
