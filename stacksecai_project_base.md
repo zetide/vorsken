@@ -254,6 +254,9 @@ dependencies = [
 | 4   | エラーハンドリング・ロギング強化（本番品質）     | ✅ W2完了        |
 | 5   | README.md 英語初稿                               | ✅ 完了（Day17） |
 | 6   | コミット・Issue・PR運用を英語に統一              | ✅ 完了（Day17） |
+| 7   | action.yml Marketplace 公開要件整備              | ✅ 完了（Day18） |
+| 8   | CHANGELOG.md 英語初稿作成                        | ✅ 完了（Day19） |
+| 9   | LICENSE copyright vorsken に統一                 | ✅ 完了（Day19） |
 
 ### M2 Week 別サマリー
 
@@ -283,6 +286,17 @@ dependencies = [
 - `tests/test_e2e.py` MOCK*CLAUDE*\* 全3定数を4値タプルに更新
 - CI グリーン確認済み ✅
 
+**Week3（Day18）**: action.yml 整備・E2E確認
+
+- `semgrep-rules` デフォルトを `${{ github.action_path }}/rules/custom` に変更
+- `outputs.verdict` → `$GITHUB_OUTPUT` 連携確認
+- E2Eテスト 5/5 パス・全テスト 79 passed / カバレッジ 100% ✅
+
+**Week3（Day19）**: OSS公開準備（ドキュメント整備）
+
+- CHANGELOG.md 作成（Keep a Changelog 形式・英語）
+- LICENSE copyright を `rilvak` → `vor
+
 ### M2 技術メモ（Day15〜）
 
 - `analyze_with_claude` 戻り値: `(verdict, summary, findings, block_reasons)` 4タプル
@@ -304,8 +318,9 @@ dependencies = [
 | Day15 ✅ | Claudeプロンプト英語化 + 文字化けクリーンアップ | SYSTEM_PROMPT刷新・新スキーマ・30テスト・cov100%       |
 | Day16 ✅ | OWASP API Top10 サンプルコード + ルール整備     | vulnerable_sample.py + rules/custom/ 10本・11 findings |
 | Day17 ✅ | README.md 英語初稿 + ブランド整備               | README上書き・author vorsken統一・バグ修正・CI✅       |
-| Day18-19 | action.yml 整備・E2E確認                        | Marketplace 公開要件確認・E2E テスト                   |
-| Day20    | バッファ + Week4スコープ確定                    | CHANGELOG・MIT確認・英語運用切り替え                   |
+| Day18 ✅ | action.yml 整備・E2E確認                        | Marketplace 公開要件確認・E2Eテスト                    |
+| Day19 ✅ | OSS公開準備（ドキュメント整備）                 | CHANGELOG.md・LICENSE修正・Week4スコープ確定           |
+| Day20    | バッファ                                        | 予備日・Week4最終確認                                  |
 
 ### Week3 終了時ゴール
 
@@ -314,12 +329,32 @@ dependencies = [
 ✅ OWASP API Top10 全10項目をサンプル+ルールで検出できる
 ✅ README.md 英語初稿完成
 ✅ action.yml が Marketplace 公開要件を満たしている
-→ Week4 で public 公開ボタンを押せる状態
+→ Week4 で public 公開ボタンを押せる状態 ✅ 達成済み（Day19完了時点）
 ```
 
 ---
 
-## 12. OWASP API Security Top10（2023）対応状況
+## 12. Week4 プラン（Day21-28）
+
+テーマ：**OSS public 公開**
+
+| Day      | テーマ                       | 主なタスク                               |
+| -------- | ---------------------------- | ---------------------------------------- |
+| Day21    | smoke test                   | 実PRでAction動作確認                     |
+| Day22    | repo transfer                | mip-ai → vorsken org へ移管              |
+| Day23    | public 化 + Marketplace 申請 | リポジトリ公開・Marketplace 登録申請     |
+| Day24    | README最終調整               | Usage例・バッジ・Marketplace審査待ち対応 |
+| Day25    | 告知記事草稿                 | dev.to / Zenn 公開告知記事               |
+| Day26-28 | バッファ                     | Issue対応・スター獲得施策                |
+
+### Marketplace 登録申請チェックリスト
+
+- [ ] `action.yml` の `name` がMarketplace上で重複していないか確認
+- [ ] READMEに `## Usage` セクション（`uses: vorsken/stacksecai-dev@v0.2.0` 例）
+- [ ] `v0.2.0` タグを切る
+- [ ] リポジトリ topics 設定（`github-actions`, `security`, `semgrep`, `owasp`）
+
+## 13. OWASP API Security Top10（2023）対応状況
 
 | #     | リスク                                          | Semgrep ルール            | 状態 |
 | ----- | ----------------------------------------------- | ------------------------- | ---- |
@@ -340,7 +375,7 @@ dependencies = [
 
 ---
 
-## 13. 新スレ開始時のテンプレート
+## 14. 新スレ開始時のテンプレート
 
 新しいスレを開始するときは、このファイルに加えて以下を貼る：
 
