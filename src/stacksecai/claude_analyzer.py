@@ -78,7 +78,7 @@ def _build_findings_text(findings: list) -> str:
     return "\n".join(lines)
 
 
-# ── Claude client (lazy initialization) ──────────────────────────────────────
+# 笏笏 Claude client (lazy initialization) 笏笏笏笏笏笏笏笏笏笏笏笏笏笏笏笏笏笏笏笏笏笏笏笏笏笏笏笏笏笏笏笏笏笏笏笏笏笏
 _client: anthropic.Anthropic | None = None
 
 
@@ -130,7 +130,7 @@ def analyze_with_claude(findings: list) -> tuple[str, str, list, list]:
     try:
         message = _call_claude(
             model="claude-haiku-4-5",
-            max_tokens=512,
+            max_tokens=1024,
             system=SYSTEM_PROMPT,
             messages=[
                 {"role": "user",      "content": user_content},
@@ -148,6 +148,23 @@ def analyze_with_claude(findings: list) -> tuple[str, str, list, list]:
         summary       = data.get("summary", "No summary available.")
         details: list[dict] = data.get("findings", [])
         block_reasons: list[str] = data.get("block_reasons", [])
+                # Inject line numbers from semgrep findings into claude details
+        rule_lines: dict[str, list[int]] = {}
+        for f in findings:
+            rule = f.get("check_id", "")
+            line = f.get("start", {}).get("line")
+            if rule and line:
+                rule_lines.setdefault(rule, []).append(line)
+
+        used: dict[str, int] = {}
+        for d in details:
+            rid = d.get("rule_id", "")
+            if rid in rule_lines and not d.get("line"):
+                idx = used.get(rid, 0)
+                if idx < len(rule_lines[rid]):
+                    d["line"] = rule_lines[rid][idx]
+                used[rid] = idx + 1
+
         return verdict, summary, details, block_reasons
 
     except Exception:

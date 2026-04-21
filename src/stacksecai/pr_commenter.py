@@ -43,7 +43,6 @@ def format_pr_comment(
         "",
     ]
 
-    # Semgrep findings table
     if semgrep_findings:
         lines += [
             "### 🔍 Semgrep Findings",
@@ -52,23 +51,22 @@ def format_pr_comment(
             "|------|----------|------|------|",
         ]
         for f in semgrep_findings:
-            sev  = f.get("extra", {}).get("severity", "—").upper()
-            path = f.get("path", "—")
-            line = f.get("start", {}).get("line", "—")
-            rule = f.get("check_id", "—").split(".")[-1]
+            sev  = f.get("extra", {}).get("severity", "").upper()
+            path = f.get("path", "")
+            line = f.get("start", {}).get("line", "")
+            rule = f.get("check_id", "").split(".")[-1]
             icon = SEVERITY_ICON.get(sev, "")
             lines.append(f"| `{rule}` | {icon} {sev} | `{path}` | {line} |")
         lines.append("")
 
-    # Claude per-finding details
     if claude_details:
         lines += ["### 🤖 Claude Analysis", ""]
         for d in claude_details:
             lines += [
                 f"**`{d.get('rule_id', 'unknown')}`**"
                 f" — Line {d.get('line', '?')}",
-                f"- **Risk:** {d.get('explanation', '')}",
-                f"- **Fix:** {d.get('fix', '')}",
+                f"- **Risk:** {d.get('message', '')}",
+                f"- **Fix:** {d.get('recommendation', '')}",
                 "",
             ]
 
@@ -79,7 +77,7 @@ def format_pr_comment(
     ]
     return "\n".join(lines)
 
-# ── 重複チェック用ヘルパー ────────────────────────────────────
+
 COMMENT_MARKER = "StackSecAI Policy Gate"
 
 
@@ -87,7 +85,6 @@ def _find_existing_comment(
     list_url: str,
     headers: dict,
 ) -> int | None:
-    """既存の StackSecAI コメントの ID を返す。なければ None。"""
     page = 1
     while True:
         resp = requests.get(
@@ -105,7 +102,7 @@ def _find_existing_comment(
         if len(comments) < 100:
             return None
         page += 1
-# ─────────────────────────────────────────────────────────────
+
 
 def post_pr_comment(
     verdict: str,
@@ -133,11 +130,9 @@ def post_pr_comment(
     existing_id = _find_existing_comment(list_url, headers)
 
     if existing_id:
-        # 既存コメントを更新（重複抑制）
         url  = f"https://api.github.com/repos/{repo}/issues/comments/{existing_id}"
         resp = requests.patch(url, json={"body": body}, headers=headers)
     else:
-        # 新規投稿
         resp = requests.post(list_url, json={"body": body}, headers=headers)
 
     resp.raise_for_status()

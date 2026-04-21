@@ -1,0 +1,22 @@
+name: StackSecAI Policy Gate
+
+on:
+  pull_request:
+    branches: [main]
+
+jobs:
+  policy-gate:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pull-requests: write
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Run StackSecAI Policy Gate
+        uses: ./
+        with:
+          anthropic-api-key: ${{ secrets.ANTHROPIC_API_KEY }}
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          semgrep-rules: ./rules/custom

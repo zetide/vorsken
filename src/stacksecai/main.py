@@ -16,27 +16,31 @@ from .semgrep_runner import run_semgrep
 def main():
     rules_path     = os.environ.get("SEMGREP_RULES", "rules/custom")
     target_path    = os.environ.get("TARGET_PATH", ".")
-    config_path    = os.environ.get("CONFIG_PATH", ".stacksecai.yml")  # ← 追加
+    config_path    = os.environ.get("CONFIG_PATH", ".stacksecai.yml")
     block_on_error = os.environ.get("BLOCK_ON_ERROR", "true").lower() == "true"
 
-    config = load_config(config_path)  # ← 追加
+    config = load_config(config_path)
 
-    print("🔍 Running Semgrep...")
+    print("剥 Running Semgrep...")
     findings = run_semgrep(rules_path, target_path)
     print(f"  Found {len(findings)} finding(s)")
 
-    print("🤖 Analyzing with Claude...")
-    claude_severity, summary, details = analyze_with_claude(findings)
+    print("､・Analyzing with Claude...")
+    claude_severity, summary, details, block_reasons = analyze_with_claude(findings)
     print(f"  Claude severity: {claude_severity}")
 
-    verdict = compute_verdict(findings, claude_severity, config=config)  # ← config渡す
+    verdict = compute_verdict(findings, claude_severity, config=config)
     badge   = VERDICT_BADGE.get(verdict, verdict)
     print(f"\n{badge} Policy Gate verdict: {verdict}")
 
     with open(os.environ.get("GITHUB_OUTPUT", "/dev/null"), "a", encoding="utf-8") as f:
         f.write(f"verdict={verdict}\n")
 
-    post_pr_comment(verdict, findings, claude_severity, summary, details)
+    try:
+        post_pr_comment(verdict, findings, claude_severity, summary, details)
+        print("  PR comment posted successfully")
+    except Exception as e:
+        print(f"  PR comment FAILED: {e}")
 
     sys.exit(EXIT_CODES.get(verdict, 0) if block_on_error else 0)
 

@@ -4,15 +4,15 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "stacksecai"
-version = "0.1.0"
+version = "0.1.1"
 requires-python = ">=3.11"
 dependencies = [
     "anthropic",
-    "httpx>=0.27.0",    # ← 追加（anthropicの内部依存、直接使うので明示）
+    "httpx>=0.27.0",
     "pyyaml",
     "requests",
     "semgrep",
-    "tenacity>=9.0.0",  # ← 追加（Day10 リトライ用）
+    "tenacity>=9.0.0",
 ]
 
 [project.optional-dependencies]
@@ -37,10 +37,11 @@ exclude_lines = [
     "if __name__ == .__main__.:",
     "raise NotImplementedError",
 ]
+
 [tool.ruff]
 line-length = 88
 target-version = "py311"
 
 [tool.ruff.lint]
-select = ["E", "F", "I"]  # E=pycodestyle, F=pyflakes, I=isort
-ignore = ["E501"]          # 長い行は許容
+select = ["E", "F", "I"]
+ignore = ["E501"]
