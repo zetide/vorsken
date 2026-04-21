@@ -148,6 +148,7 @@ def analyze_with_claude(findings: list) -> tuple[str, str, list, list]:
         summary       = data.get("summary", "No summary available.")
         details: list[dict] = data.get("findings", [])
         block_reasons: list[str] = data.get("block_reasons", [])
+        print(f"  Claude details raw: {json.dumps(details, ensure_ascii=False)}")
         return verdict, summary, details, block_reasons
 
     except Exception:
