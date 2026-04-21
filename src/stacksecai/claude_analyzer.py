@@ -148,7 +148,6 @@ def analyze_with_claude(findings: list) -> tuple[str, str, list, list]:
         summary       = data.get("summary", "No summary available.")
         details: list[dict] = data.get("findings", [])
         block_reasons: list[str] = data.get("block_reasons", [])
-        print(f"  Claude details raw: {json.dumps(details, ensure_ascii=False)}")
                 # Inject line numbers from semgrep findings into claude details
         rule_lines: dict[str, list[int]] = {}
         for f in findings:
