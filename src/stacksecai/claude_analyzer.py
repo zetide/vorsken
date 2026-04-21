@@ -78,7 +78,7 @@ def _build_findings_text(findings: list) -> str:
     return "\n".join(lines)
 
 
-# ── Claude client (lazy initialization) ──────────────────────────────────────
+# 笏笏 Claude client (lazy initialization) 笏笏笏笏笏笏笏笏笏笏笏笏笏笏笏笏笏笏笏笏笏笏笏笏笏笏笏笏笏笏笏笏笏笏笏笏笏笏
 _client: anthropic.Anthropic | None = None
 
 
@@ -130,7 +130,7 @@ def analyze_with_claude(findings: list) -> tuple[str, str, list, list]:
     try:
         message = _call_claude(
             model="claude-haiku-4-5",
-            max_tokens=512,
+            max_tokens=1024,
             system=SYSTEM_PROMPT,
             messages=[
                 {"role": "user",      "content": user_content},
