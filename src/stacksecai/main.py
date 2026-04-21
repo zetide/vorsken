@@ -21,11 +21,11 @@ def main():
 
     config = load_config(config_path)
 
-    print("🔍 Running Semgrep...")
+    print("剥 Running Semgrep...")
     findings = run_semgrep(rules_path, target_path)
     print(f"  Found {len(findings)} finding(s)")
 
-    print("🤖 Analyzing with Claude...")
+    print("､・Analyzing with Claude...")
     claude_severity, summary, details, block_reasons = analyze_with_claude(findings)
     print(f"  Claude severity: {claude_severity}")
 
@@ -36,7 +36,11 @@ def main():
     with open(os.environ.get("GITHUB_OUTPUT", "/dev/null"), "a", encoding="utf-8") as f:
         f.write(f"verdict={verdict}\n")
 
-    post_pr_comment(verdict, findings, claude_severity, summary, details)
+    try:
+        post_pr_comment(verdict, findings, claude_severity, summary, details)
+        print("  PR comment posted successfully")
+    except Exception as e:
+        print(f"  PR comment FAILED: {e}")
 
     sys.exit(EXIT_CODES.get(verdict, 0) if block_on_error else 0)
 
