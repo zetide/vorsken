@@ -23,7 +23,7 @@ def _run_main(findings, severity, verdict, block_on_error="true", tmp_path=None)
         "PR_NUMBER":         "1",
     }
     with patch("stacksecai.main.run_semgrep",        return_value=findings), \
-         patch("stacksecai.main.analyze_with_claude", return_value=(severity, "summary", [])), \
+         patch("stacksecai.main.analyze_with_claude", return_value=(severity, "summary", [], [])), \
          patch("stacksecai.main.post_pr_comment"), \
          patch.dict("os.environ", env):
         return main()
