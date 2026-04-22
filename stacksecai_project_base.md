@@ -27,15 +27,15 @@ Anthropic の auto-fix の「前段でポリシーを強制する層」として
 
 ## 2. リポジトリ情報
 
-| 項目               | 内容                                               |
-| ------------------ | -------------------------------------------------- |
-| リポジトリ         | https://github.com/stacksecai/stacksecai-dev       |
-| ローカルパス       | C:\dev\stacksecai-dev                              |
-| Python（ローカル） | 3.14.3                                             |
-| Python（CI）       | 3.11                                               |
-| パッケージ構成     | src/stacksecai/ 以下                               |
-| ブランチ運用       | main ブランチへ直 push（現状）                     |
-| Org transfer 予定  | OSS公開直前（5月頭）に mip-ai → vorsken org へ移管 |
+| 項目               | 内容                                                  |
+| ------------------ | ----------------------------------------------------- |
+| リポジトリ         | https://github.com/vorsken/stacksecai-dev             |
+| ローカルパス       | C:\dev\stacksecai-dev                                 |
+| Python（ローカル） | 3.14.3                                                |
+| Python（CI）       | 3.11                                                  |
+| パッケージ構成     | src/stacksecai/ 以下                                  |
+| ブランチ運用       | main ブランチへ直 push（現状）                        |
+| Org transfer       | ✅ 完了（Day22）stacksecai org → vorsken org 移管済み |
 
 ### ブランド・Org 方針
 
@@ -43,9 +43,9 @@ Anthropic の auto-fix の「前段でポリシーを強制する層」として
 | -------------- | ---------------------------------------------------------- |
 | 開発者ブランド | **vorsken**（GitHub Org・ドメイン取得済み・非公開）        |
 | 親ブランド候補 | **zetide**（OSS公開時に再検討・非公開）                    |
-| 現アカウント   | mip-ai 配下で開発継続                                      |
-| repo transfer  | OSS公開直前（5月頭）に `vorsken/stacksecai-dev` へ移管予定 |
-| transfer 備考  | GitHub の自動リダイレクトあり・CI/CD 引き継ぎ可能          |
+| 現アカウント   | mip-ai（変更なし）                                         |
+| repo transfer  | ✅ 完了（Day22）`stacksecai` org → `vorsken` org へ移管    |
+| transfer 備考  | GitHub の自動リダイレクトあり・CI/CD・Secrets 引き継ぎ済み |
 
 ---
 
@@ -151,7 +151,7 @@ rules:
 
 ```powershell
 # リポジトリクローン
-git clone https://github.com/stacksecai/stacksecai-dev.git
+git clone https://github.com/vorsken/stacksecai-dev.git
 cd stacksecai-dev
 
 # 依存インストール
@@ -340,8 +340,8 @@ dependencies = [
 
 | Day      | テーマ                       | 主なタスク                               |
 | -------- | ---------------------------- | ---------------------------------------- |
-| Day21    | smoke test                   | 実PRでAction動作確認                     |
-| Day22    | repo transfer                | mip-ai → vorsken org へ移管              |
+| Day21 ✅ | smoke test                   | 実PRでAction動作確認                     |
+| Day22 ✅ | repo transfer                | mip-ai → vorsken org 移管完了            |
 | Day23    | public 化 + Marketplace 申請 | リポジトリ公開・Marketplace 登録申請     |
 | Day24    | README最終調整               | Usage例・バッジ・Marketplace審査待ち対応 |
 | Day25    | 告知記事草稿                 | dev.to / Zenn 公開告知記事               |
