@@ -166,6 +166,18 @@ semgrep --config rules/custom tests/fixtures/vulnerable_sample.py
 
 ---
 
+## Privacy
+
+Changed files in PRs are sent to Anthropic's Claude API for analysis.
+No data is stored or logged by vorsken.
+By using this Action, you agree to [Anthropic's usage policies](https://www.anthropic.com/legal/usage-policy).
+
+## Disclaimer
+
+This tool uses AI analysis and may produce false positives or miss vulnerabilities.
+Results should be reviewed by a human before taking action.
+The authors are not responsible for any security incidents arising from use of this tool.
+
 ## License
 
 MIT — see [LICENSE](LICENSE).
