@@ -48,13 +48,23 @@ runs:
       shell: bash
       run: pip install "${{ github.action_path }}"
 
+    - name: "Resolve semgrep rules path"
+      id: resolve-rules
+      shell: bash
+      run: |
+        RULES="${{ inputs.semgrep-rules }}"
+        if [ -z "$RULES" ]; then
+          RULES="${GITHUB_ACTION_PATH}/rules/custom"
+        fi
+        echo "rules_path=$RULES" >> $GITHUB_OUTPUT
+
     - name: "Run Policy Gate"
       id: gate
       shell: bash
       run: python -m stacksecai.main
       env:
         ANTHROPIC_API_KEY: "${{ inputs.anthropic-api-key }}"
-        SEMGREP_RULES:     "${{ inputs.semgrep-rules }}"
+        SEMGREP_RULES: "${{ steps.resolve-rules.outputs.rules_path }}"
         BLOCK_ON_ERROR:    "${{ inputs.block-on-error }}"
         GITHUB_TOKEN:      "${{ inputs.github-token }}"
         TARGET_PATH:       "${{ inputs.target-path }}"
