@@ -1,1 +1,14 @@
 anthropic
+httpx>=0.27.0
+pyyaml
+requests
+semgrep
+tenacity>=9.0.0
+
+[dev]
+pytest
+pytest-cov
+ruff
+mypy
+types-requests
+types-PyYAML

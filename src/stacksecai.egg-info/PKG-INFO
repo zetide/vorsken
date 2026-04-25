@@ -4,4 +4,16 @@ Version: 0.1.0
 Requires-Python: >=3.11
 License-File: LICENSE
 Requires-Dist: anthropic
+Requires-Dist: httpx>=0.27.0
+Requires-Dist: pyyaml
+Requires-Dist: requests
+Requires-Dist: semgrep
+Requires-Dist: tenacity>=9.0.0
+Provides-Extra: dev
+Requires-Dist: pytest; extra == "dev"
+Requires-Dist: pytest-cov; extra == "dev"
+Requires-Dist: ruff; extra == "dev"
+Requires-Dist: mypy; extra == "dev"
+Requires-Dist: types-requests; extra == "dev"
+Requires-Dist: types-PyYAML; extra == "dev"
 Dynamic: license-file

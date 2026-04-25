@@ -3,9 +3,10 @@ README.md
 pyproject.toml
 src/stacksecai/__init__.py
 src/stacksecai/claude_analyzer.py
+src/stacksecai/config.py
+src/stacksecai/gate.py
 src/stacksecai/main.py
 src/stacksecai/policy_gate.py
-src/stacksecai/policy_gate_BU.py
 src/stacksecai/pr_commenter.py
 src/stacksecai/semgrep_runner.py
 src/stacksecai.egg-info/PKG-INFO
@@ -13,5 +14,9 @@ src/stacksecai.egg-info/SOURCES.txt
 src/stacksecai.egg-info/dependency_links.txt
 src/stacksecai.egg-info/requires.txt
 src/stacksecai.egg-info/top_level.txt
+tests/test_config.py
+tests/test_e2e.py
+tests/test_gate_cli.py
+tests/test_main.py
 tests/test_policy_gate.py
 tests/test_semgrep_runner.py

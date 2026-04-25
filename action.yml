@@ -1,7 +1,7 @@
 $content = @"
-name: 'stacksecai Policy Gate'
-description: 'Enforce security policies on PRs via Semgrep + Claude AI. Returns BLOCK / FLAG / PASS.'
-author: 'vorsken'
+name: 'vorsken'
+description: 'Auto-comments API vulnerability findings on PRs using Semgrep + Claude AI'
+author: 'zetide'
 
 branding:
   icon: 'shield'
@@ -14,7 +14,7 @@ inputs:
   semgrep-rules:
     description: 'Path to Semgrep rules directory'
     required: false
-    default: '${{ github.action_path }}/rules/custom'
+    default: '`${{ github.action_path }}/rules/custom'
   block-on-error:
     description: 'Exit code 1 on BLOCK verdict (blocks merge if required check)'
     required: false
@@ -22,20 +22,20 @@ inputs:
   github-token:
     description: 'GitHub token for PR comments'
     required: false
-    default: `${{ github.token }}
+    default: '`${{ github.token }}'
   target-path:
     description: 'Path to scan (defaults to repo root)'
     required: false
     default: '.'
   config-path:
-    description: 'Path to .stacksecai.yml config file'
+    description: 'Path to .vorsken.yml config file'
     required: false
-    default: '.stacksecai.yml'
+    default: '.vorsken.yml'
 
 outputs:
   verdict:
     description: 'Policy Gate verdict: BLOCK | FLAG | PASS'
-    value: `${{ steps.gate.outputs.verdict }}
+    value: '`${{ steps.gate.outputs.verdict }}'
 
 runs:
   using: 'composite'
@@ -45,7 +45,7 @@ runs:
       with:
         python-version: '3.11'
 
-    - name: Install stacksecai + dependencies
+    - name: Install vorsken + dependencies
       shell: bash
       run: pip install "`${{ github.action_path }}"
 
@@ -54,14 +54,14 @@ runs:
       shell: bash
       run: python -m stacksecai.main
       env:
-        ANTHROPIC_API_KEY: `${{ inputs.anthropic-api-key }}
-        SEMGREP_RULES:     `${{ inputs.semgrep-rules }}
-        BLOCK_ON_ERROR:    `${{ inputs.block-on-error }}
-        GITHUB_TOKEN:      `${{ inputs.github-token }}
-        TARGET_PATH:       `${{ inputs.target-path }}
-        CONFIG_PATH:       `${{ inputs.config-path }}
-        GITHUB_REPOSITORY: `${{ github.repository }}
-        PR_NUMBER:         `${{ github.event.pull_request.number }}
+        ANTHROPIC_API_KEY: '`${{ inputs.anthropic-api-key }}'
+        SEMGREP_RULES:     '`${{ inputs.semgrep-rules }}'
+        BLOCK_ON_ERROR:    '`${{ inputs.block-on-error }}'
+        GITHUB_TOKEN:      '`${{ inputs.github-token }}'
+        TARGET_PATH:       '`${{ inputs.target-path }}'
+        CONFIG_PATH:       '`${{ inputs.config-path }}'
+        GITHUB_REPOSITORY: '`${{ github.repository }}'
+        PR_NUMBER:         '`${{ github.event.pull_request.number }}'
 "@
 
 [System.IO.File]::WriteAllText(

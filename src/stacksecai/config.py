@@ -1,6 +1,6 @@
 # src/stacksecai/config.py
 """
-Loads .stacksecai.yml config. Falls back to defaults if file not found.
+Loads .vorsken.yml config. Falls back to defaults if file not found.
 """
 from __future__ import annotations
 
@@ -42,8 +42,7 @@ class PolicyConfig:
     rule_overrides:  dict[str, str] = field(default_factory=dict)
     # rule_overrides: {"hardcoded-password": "BLOCK", ...}
 
-
-def load_config(config_path: str = ".stacksecai.yml") -> PolicyConfig:
+def load_config(config_path: str = ".vorsken.yml") -> PolicyConfig:
     p = Path(config_path)
     if not p.exists():
         return PolicyConfig()  # all defaults

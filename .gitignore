@@ -6,3 +6,7 @@ __pycache__/
 
 # Temp scripts
 fix_*.py
+
+__pycache__/
+.coverage
+src/*.egg-info/

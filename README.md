@@ -1,10 +1,10 @@
-# StackSecAI Policy Gate
+# vorsken
 
 > **Enforce API security policies on every PR — automatically.**
 > Semgrep detects vulnerabilities. Claude AI explains them in plain English. Your merge is blocked before bad code ships.
 
-[![CI](https://github.com/stacksecai/stacksecai-dev/actions/workflows/ci.yml/badge.svg)](https://github.com/stacksecai/stacksecai-dev/actions/workflows/ci.yml)
-[![codecov](https://img.shields.io/badge/coverage-100%25-brightgreen)](https://github.com/stacksecai/stacksecai-dev)
+[![CI](https://github.com/zetide/vorsken/actions/workflows/ci.yml/badge.svg)](https://github.com/zetide/vorsken/actions/workflows/ci.yml)
+[![codecov](https://img.shields.io/badge/coverage-100%25-brightgreen)](https://github.com/zetide/vorsken)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 [![OWASP API Top10](https://img.shields.io/badge/OWASP%20API-Top10%202023-blue)](https://owasp.org/API-Security/)
 
@@ -12,18 +12,18 @@
 
 ## What It Does
 
-StackSecAI Policy Gate is a GitHub Action that acts as a **security policy enforcement layer** on pull requests.
+vorsken is a GitHub Action that acts as a **security policy enforcement layer** on pull requests.
 
-```
 PR opened / updated
-  └─▶ Semgrep scans changed files with OWASP API Top10 rules
-        └─▶ Claude AI analyzes findings and generates an English report
-              └─▶ Verdict posted as a PR comment: BLOCK / FLAG / PASS
-                    └─▶ BLOCK verdict fails the required check → merge is prevented
-```
+└─▶ Semgrep scans changed files with OWASP API Top10 rules
+└─▶ Claude AI analyzes findings and generates an English report
+└─▶ Verdict posted as a PR comment: BLOCK / FLAG / PASS
+└─▶ BLOCK verdict fails the required check → merge is prevented
+
+text
 
 **Why this, not just Semgrep alone?**
-Semgrep gives you rule IDs and line numbers. StackSecAI adds Claude AI context:
+Semgrep gives you rule IDs and line numbers. vorsken adds Claude AI context:
 what the vulnerability means, which OWASP category it maps to, and a concrete fix suggestion — all in the PR comment, without leaving GitHub.
 
 ---
@@ -32,10 +32,10 @@ what the vulnerability means, which OWASP category it maps to, and a concrete fi
 
 ### 1. Add the workflow file
 
-Create `.github/workflows/stacksecai.yml` in your repository:
+Create `.github/workflows/vorsken.yml` in your repository:
 
 ```yaml
-name: StackSecAI Policy Gate
+name: vorsken Policy Gate
 
 on:
   pull_request:
@@ -51,7 +51,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - uses: stacksecai/stacksecai-dev@v1
+      - uses: zetide/vorsken@v0.2.0
         with:
           anthropic-api-key: ${{ secrets.ANTHROPIC_API_KEY }}
 ```
@@ -60,35 +60,33 @@ jobs:
 
 Go to **Settings → Secrets and variables → Actions** and add:
 
-```
 ANTHROPIC_API_KEY = sk-ant-...
-```
+
+text
 
 ### 3. Open a pull request
 
-That's it. StackSecAI will automatically scan, analyze, and comment on every PR.
+That's it. vorsken will automatically scan, analyze, and comment on every PR.
 
 ---
 
 ## PR Comment Example
 
-```
-## 🚨 StackSecAI Policy Gate — BLOCK
+🚨 vorsken Policy Gate — BLOCK
 
-**Summary:** A hardcoded API key and an SSRF vulnerability were detected.
+Summary: A hardcoded API key and an SSRF vulnerability were detected.
 Merge is blocked until these issues are resolved.
+Severity Rule OWASP Category Recommendation
+🔴 HIGH hardcoded-api-key API8:2023 Security Misconfiguration Move credentials to environment variables.
+🔴 HIGH ssrf-requests API7:2023 SSRF Validate and allowlist external URLs before requests.
 
-| Severity | Rule | OWASP Category | Recommendation |
-|----------|------|----------------|----------------|
-| 🔴 HIGH | hardcoded-api-key | API8:2023 Security Misconfiguration | Move credentials to environment variables. |
-| 🔴 HIGH | ssrf-requests | API7:2023 SSRF | Validate and allowlist external URLs before requests. |
-```
+text
 
 ---
 
 ## Configuration
 
-Create `.stacksecai.yml` in your repository root to customize behavior:
+Create `.vorsken.yml` in your repository root to customize behavior:
 
 ```yaml
 policy:
@@ -106,14 +104,14 @@ rules:
 
 ### All inputs
 
-| Input               | Required | Default           | Description                     |
-| ------------------- | -------- | ----------------- | ------------------------------- |
-| `anthropic-api-key` | ✅       | —                 | Anthropic API key for Claude    |
-| `github-token`      | —        | `github.token`    | GitHub token for PR comments    |
-| `semgrep-rules`     | —        | `rules/custom`    | Path to Semgrep rules directory |
-| `target-path`       | —        | `.`               | Path to scan                    |
-| `config-path`       | —        | `.stacksecai.yml` | Path to config file             |
-| `block-on-error`    | —        | `true`            | Exit code 1 on BLOCK verdict    |
+| Input               | Required | Default        | Description                     |
+| ------------------- | -------- | -------------- | ------------------------------- |
+| `anthropic-api-key` | ✅       | —              | Anthropic API key for Claude    |
+| `github-token`      | —        | `github.token` | GitHub token for PR comments    |
+| `semgrep-rules`     | —        | `rules/custom` | Path to Semgrep rules directory |
+| `target-path`       | —        | `.`            | Path to scan                    |
+| `config-path`       | —        | `.vorsken.yml` | Path to config file             |
+| `block-on-error`    | —        | `true`         | Exit code 1 on BLOCK verdict    |
 
 ### Output
 
@@ -143,8 +141,8 @@ rules:
 ## Local Development
 
 ```bash
-git clone https://github.com/stacksecai/stacksecai-dev.git
-cd stacksecai-dev
+git clone https://github.com/zetide/vorsken.git
+cd vorsken
 pip install -e .
 
 # Run tests
@@ -176,7 +174,7 @@ MIT — see [LICENSE](LICENSE).
 
 ## About
 
-Built by [@vorsken](https://github.com/vorsken) as the first OSS module of **StackSecAI** —
+Built by **[zetide](https://github.com/zetide)** —
 a security observability platform for API-first teams.
 
 > _"Shift security left — before the merge, not after the breach."_
