@@ -27,15 +27,19 @@ Anthropic の auto-fix の「前段でポリシーを強制する層」として
 
 ## 2. リポジトリ情報
 
-| 項目               | 内容                                                  |
-| ------------------ | ----------------------------------------------------- |
-| リポジトリ         | https://github.com/vorsken/stacksecai-dev             |
-| ローカルパス       | C:\dev\stacksecai-dev                                 |
-| Python（ローカル） | 3.14.3                                                |
-| Python（CI）       | 3.11                                                  |
-| パッケージ構成     | src/stacksecai/ 以下                                  |
-| ブランチ運用       | main ブランチへ直 push（現状）                        |
-| Org transfer       | ✅ 完了（Day22）stacksecai org → vorsken org 移管済み |
+| 項目               | 内容                                                 |
+| ------------------ | ---------------------------------------------------- |
+| リポジトリ         | https://github.com/vorsken/stacksecai-dev            |
+| ローカルパス       | C:\dev\stacksecai-dev                                |
+| Python（ローカル） | 3.14.3                                               |
+| Python（CI）       | 3.11                                                 |
+| パッケージ構成     | src/stacksecai/ 以下                                 |
+| ブランチ運用       | main ブランチへ直 push（現状）                       |
+| Org transfer       | ✅ 完了（Day22）stacksecai org → zetide org 移管済み |
+| Marketplace        | ✅ 公開済み（Day23）vorsken-policy-gate              |
+| Public リポジトリ  | https://github.com/zetide/vorsken                    |
+| テストリポジトリ   | https://github.com/zetide/vorsken-test               |
+| 最新バージョン     | v0.2.5                                               |
 
 ### ブランド・Org 方針
 
@@ -297,6 +301,18 @@ dependencies = [
 - CHANGELOG.md 作成（Keep a Changelog 形式・英語）
 - LICENSE copyright を `rilvak` → `vor
 
+**Week4（Day23）**: GitHub Marketplace 正式公開 & E2E動作確認
+
+- action.yml スマートクォート修正（v0.2.1）
+- Semgrep ルールパス解決修正・GITHUB_ACTION_PATH フォールバック（v0.2.3）
+- analyze_with_claude アンパック 3→4 修正（v0.2.4）
+- semgrep_runner include パターン `src/**` → `**` 変更（v0.2.5）
+- PRコメント権限（pull-requests: write）追加
+- ANTHROPIC_API_KEY input名ハイフン統一
+- GitHub Marketplace 正式公開（vorsken-policy-gate）✅
+- E2E 動作確認：BLOCK verdict + PRコメント投稿成功 ✅
+- zetide/vorsken-test テストリポジトリ作成
+
 ### M2 技術メモ（Day15〜）
 
 - `analyze_with_claude` 戻り値: `(verdict, summary, findings, block_reasons)` 4タプル
@@ -338,21 +354,22 @@ dependencies = [
 
 テーマ：**OSS public 公開**
 
-| Day      | テーマ                       | 主なタスク                               |
-| -------- | ---------------------------- | ---------------------------------------- |
-| Day21 ✅ | smoke test                   | 実PRでAction動作確認                     |
-| Day22 ✅ | repo transfer                | mip-ai → vorsken org 移管完了            |
-| Day23    | public 化 + Marketplace 申請 | リポジトリ公開・Marketplace 登録申請     |
-| Day24    | README最終調整               | Usage例・バッジ・Marketplace審査待ち対応 |
-| Day25    | 告知記事草稿                 | dev.to / Zenn 公開告知記事               |
-| Day26-28 | バッファ                     | Issue対応・スター獲得施策                |
+| Day      | テーマ                       | 主なタスク                                                     |
+| -------- | ---------------------------- | -------------------------------------------------------------- |
+| Day21 ✅ | smoke test                   | 実PRでAction動作確認                                           |
+| Day22 ✅ | repo transfer                | mip-ai → vorsken org 移管完了                                  |
+| Day23 ✅ | public 化 + Marketplace 公開 | リポジトリ公開・Marketplace 正式公開・E2E動作確認（BLOCK確認） |
+| Day24    | README最終調整               | Usage例・バッジ・Marketplace審査待ち対応                       |
+| Day25    | 告知記事草稿                 | dev.to / Zenn 公開告知記事                                     |
+| Day26-28 | バッファ                     | Issue対応・スター獲得施策                                      |
 
 ### Marketplace 登録申請チェックリスト
 
-- [ ] `action.yml` の `name` がMarketplace上で重複していないか確認
-- [ ] READMEに `## Usage` セクション（`uses: vorsken/stacksecai-dev@v0.2.0` 例）
-- [ ] `v0.2.0` タグを切る
-- [ ] リポジトリ topics 設定（`github-actions`, `security`, `semgrep`, `owasp`）
+- [x] `action.yml` の `name` がMarketplace上で重複していないか確認
+- [x] READMEに `## Usage` セクション
+- [x] `v0.2.0` タグを切る ✅（最新: v0.2.5）
+- [x] リポジトリ topics 設定
+- [x] GitHub Marketplace 正式公開 ✅（Day23）
 
 ## 13. OWASP API Security Top10（2023）対応状況
 
