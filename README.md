@@ -1,5 +1,8 @@
 # vorsken
 
+[![Latest Release](https://img.shields.io/github/v/release/zetide/vorsken)](https://github.com/zetide/vorsken/releases/latest)
+[![Marketplace](https://img.shields.io/badge/GitHub%20Marketplace-Vorsken%20Policy%20Gate-blue?logo=github)](https://github.com/marketplace/actions/vorsken-policy-gate)
+
 > **Enforce API security policies on every PR — automatically.**
 > Semgrep detects vulnerabilities. Claude AI explains them in plain English. Your merge is blocked before bad code ships.
 
