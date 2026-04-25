@@ -53,7 +53,7 @@ runs:
       shell: bash
       run: |
         RULES="${{ inputs.semgrep-rules }}"
-        if [ -z "$RULES" ]; then
+        if [ ! -d "$RULES" ]; then
           RULES="${GITHUB_ACTION_PATH}/rules/custom"
         fi
         echo "rules_path=$RULES" >> $GITHUB_OUTPUT
