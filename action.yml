@@ -1,4 +1,4 @@
-name: 'vorsken'
+name: 'vorsken Policy Gate'
 description: 'Auto-comments API vulnerability findings on PRs using Semgrep + Claude AI'
 author: 'zetide'
 
