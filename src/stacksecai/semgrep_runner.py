@@ -13,7 +13,7 @@ from pathlib import Path
 def run_semgrep(
     rules_path: str = "rules/",
     target_path: str = ".",
-    include: str = "src/**",
+    include: str = "**",
     output_path: str | None = "semgrep-results.json",
 ) -> list:
     """
