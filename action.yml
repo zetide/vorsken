@@ -1,63 +1,63 @@
-name: 'vorsken Policy Gate'
-description: 'Auto-comments API vulnerability findings on PRs using Semgrep + Claude AI'
-author: 'zetide'
+name: "vorsken Policy Gate"
+description: "Auto-comments API vulnerability findings on PRs using Semgrep + Claude AI"
+author: "zetide"
 
 branding:
-  icon: 'shield'
-  color: 'red'
+  icon: "shield"
+  color: "red"
 
 inputs:
   anthropic-api-key:
-    description: 'Anthropic API key for Claude'
+    description: "Anthropic API key for Claude"
     required: true
   semgrep-rules:
-    description: 'Path to Semgrep rules directory'
+    description: "Path to Semgrep rules directory"
     required: false
-    default: '${{ github.action_path }}/rules/custom'
+    default: "${{ github.action_path }}/rules/custom"
   block-on-error:
-    description: 'Exit code 1 on BLOCK verdict (blocks merge if required check)'
+    description: "Exit code 1 on BLOCK verdict (blocks merge if required check)"
     required: false
-    default: 'true'
+    default: "true"
   github-token:
-    description: 'GitHub token for PR comments'
+    description: "GitHub token for PR comments"
     required: false
-    default: '${{ github.token }}'
+    default: "${{ github.token }}"
   target-path:
-    description: 'Path to scan (defaults to repo root)'
+    description: "Path to scan (defaults to repo root)"
     required: false
-    default: '.'
+    default: "."
   config-path:
-    description: 'Path to .vorsken.yml config file'
+    description: "Path to .vorsken.yml config file"
     required: false
-    default: '.vorsken.yml'
+    default: ".vorsken.yml"
 
 outputs:
   verdict:
-    description: 'Policy Gate verdict: BLOCK | FLAG | PASS'
-    value: '${{ steps.gate.outputs.verdict }}'
+    description: "Policy Gate verdict: BLOCK | FLAG | PASS"
+    value: "${{ steps.gate.outputs.verdict }}"
 
 runs:
-  using: 'composite'
+  using: "composite"
   steps:
-    - name: Set up Python
+    - name: "Set up Python"
       uses: actions/setup-python@v5
       with:
-        python-version: '3.11'
+        python-version: "3.11"
 
-    - name: Install vorsken + dependencies
+    - name: "Install vorsken + dependencies"
       shell: bash
       run: pip install "${{ github.action_path }}"
 
-    - name: Run Policy Gate
+    - name: "Run Policy Gate"
       id: gate
       shell: bash
       run: python -m stacksecai.main
       env:
-        ANTHROPIC_API_KEY: '${{ inputs.anthropic-api-key }}'
-        SEMGREP_RULES:     '${{ inputs.semgrep-rules }}'
-        BLOCK_ON_ERROR:    '${{ inputs.block-on-error }}'
-        GITHUB_TOKEN:      '${{ inputs.github-token }}'
-        TARGET_PATH:       '${{ inputs.target-path }}'
-        CONFIG_PATH:       '${{ inputs.config-path }}'
-        GITHUB_REPOSITORY: '${{ github.repository }}'
-        PR_NUMBER:         '${{ github.event.pull_request.number }}'
+        ANTHROPIC_API_KEY: "${{ inputs.anthropic-api-key }}"
+        SEMGREP_RULES:     "${{ inputs.semgrep-rules }}"
+        BLOCK_ON_ERROR:    "${{ inputs.block-on-error }}"
+        GITHUB_TOKEN:      "${{ inputs.github-token }}"
+        TARGET_PATH:       "${{ inputs.target-path }}"
+        CONFIG_PATH:       "${{ inputs.config-path }}"
+        GITHUB_REPOSITORY: "${{ github.repository }}"
+        PR_NUMBER:         "${{ github.event.pull_request.number }}"
