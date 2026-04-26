@@ -97,8 +97,10 @@ class TestAnalyzeHappyPath:
                 "rule_id": "hardcoded-api-key",
                 "owasp_category": "API8:2023 - Security Misconfiguration",
                 "severity": "HIGH",
-                "message": "Hardcoded API key found.",
-                "recommendation": "Use environment variables.",
+                "description": "Hardcoded API key found in source code.",
+                "risk": "Attacker can authenticate as the service and access protected resources.",
+                "fix": "Remove hardcoded key. Use environment variable: api_key = os.environ['API_KEY']",
+                "line": 0,
             }],
             block_reasons=["hardcoded-api-key"],
         ))
@@ -121,8 +123,10 @@ class TestAnalyzeHappyPath:
                 "rule_id": "ssrf-risk",
                 "owasp_category": "API7:2023 - Server Side Request Forgery",
                 "severity": "MEDIUM",
-                "message": "Possible SSRF via user-controlled URL.",
-                "recommendation": "Validate and whitelist URLs.",
+                "description": "Possible SSRF via user-controlled URL.",
+                "risk": "Attacker can make the server issue requests to internal services.",
+                "fix": "Validate and whitelist URLs against an allowlist before making requests.",
+                "line": 0,
             }],
         ))
         verdict, summary, findings, block_reasons = mod.analyze_with_claude(
@@ -154,9 +158,15 @@ class TestAnalyzeHappyPath:
             verdict="BLOCK",
             findings=[
                 {"rule_id": "eval-injection", "owasp_category": "N/A",
-                 "severity": "CRITICAL", "message": "eval() called.", "recommendation": "Remove eval()."},
+                 "severity": "CRITICAL", "description": "eval() called with user input.",
+                 "risk": "Attacker can execute arbitrary code on the server.",
+                 "fix": "Remove eval(). Use a safe alternative such as ast.literal_eval().",
+                 "line": 0},
                 {"rule_id": "sql-injection", "owasp_category": "N/A",
-                 "severity": "HIGH", "message": "SQL injection.", "recommendation": "Use parameterized queries."},
+                 "severity": "HIGH", "description": "SQL query built with string concatenation.",
+                 "risk": "Attacker can read, modify, or delete arbitrary database records.",
+                 "fix": "Use parameterized queries: cursor.execute('SELECT * FROM t WHERE id = %s', (user_id,))",
+                 "line": 0},
             ],
             block_reasons=["eval-injection", "sql-injection"],
         ))
@@ -171,7 +181,10 @@ class TestAnalyzeHappyPath:
             verdict="FLAG",
             findings=[{
                 "rule_id": "subprocess-shell-true", "owasp_category": "N/A",
-                "severity": "MEDIUM", "message": "shell=True.", "recommendation": "Avoid shell=True.",
+                "severity": "MEDIUM", "description": "subprocess called with shell=True.",
+                "risk": "Attacker can inject shell commands via unsanitized input.",
+                "fix": "Pass arguments as a list instead: subprocess.run(['cmd', arg], shell=False)",
+                "line": 0,
             }],
         ))
         _, _, findings, _ = mod.analyze_with_claude([{}])

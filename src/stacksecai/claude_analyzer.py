@@ -47,11 +47,18 @@ SYSTEM_PROMPT = (
     '{"verdict":"BLOCK|FLAG|PASS","summary":"<English summary>",'
     '"findings":[{"rule_id":"<id>","owasp_category":"<API1:2023... or N/A>",'
     '"severity":"CRITICAL|HIGH|MEDIUM|LOW|INFO",'
-    '"message":"<English description>","recommendation":"<English fix>"}],'
+    '"description":"<What this vulnerability is, 1 sentence>",'
+    '"risk":"<What an attacker can achieve by exploiting this. MUST be non-empty>",'
+    '"fix":"<Specific, actionable code-level fix. MUST be non-empty>",'
+    '"line":<line number as integer or 0>}],'
     '"block_reasons":["<rule_id>"]}\n\n'
-    "Notes:\n"
+    "Rules:\n"
     "- block_reasons must be [] when verdict is FLAG or PASS.\n"
     "- findings must be [] when verdict is PASS.\n"
+    "- `risk` MUST always be a non-empty string. "
+    "Example: 'Attacker can read or modify other users data by manipulating the ID parameter.'\n"
+    "- `fix` MUST always be a non-empty string with a concrete code change. "
+    "Example: 'Add ownership check: if obj.owner_id != current_user.id: raise HTTPException(403)'\n"
     "- Do NOT hallucinate findings. Only report what Semgrep detected.\n"
 )
 
