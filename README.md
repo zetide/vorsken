@@ -54,7 +54,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - uses: zetide/vorsken@v0.2.0
+      - uses: zetide/vorsken@v0.2.5
         with:
           anthropic-api-key: ${{ secrets.ANTHROPIC_API_KEY }}
 ```
