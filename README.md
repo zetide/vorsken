@@ -10,6 +10,7 @@
 [![codecov](https://img.shields.io/badge/coverage-100%25-brightgreen)](https://github.com/zetide/vorsken)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 [![OWASP API Top10](https://img.shields.io/badge/OWASP%20API-Top10%202023-blue)](https://owasp.org/API-Security/)
+[![dev.to](https://img.shields.io/badge/dev.to-article-0A0A0A?logo=devdotto&logoColor=white)](https://dev.to/vorsken/stop-merging-vulnerable-api-code-automate-pr-security-gates-with-semgrep-claude-ai-22ik)
 
 ---
 
