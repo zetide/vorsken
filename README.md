@@ -2,7 +2,8 @@
 
 [![Latest Release](https://img.shields.io/github/v/release/zetide/vorsken)](https://github.com/zetide/vorsken/releases/latest)
 [![Marketplace](https://img.shields.io/badge/GitHub%20Marketplace-Vorsken%20Policy%20Gate-blue?logo=github)](https://github.com/marketplace/actions/vorsken-policy-gate)
-
+> Not a linter. Not a SAST dashboard.
+> A gate that blocks the merge — with AI context in plain English.
 > **Enforce API security policies on every PR — automatically.**
 > Semgrep detects vulnerabilities. Claude AI explains them in plain English. Your merge is blocked before bad code ships.
 
@@ -15,6 +16,13 @@
 ---
 
 ## What It Does
+
+### What a BLOCK looks like
+
+![vorsken BLOCK comment](docs/screenshot-block.png)
+
+> The PR comment shows verdict, OWASP category, risk explanation,
+> and a concrete fix — without leaving GitHub.
 
 vorsken is a GitHub Action that acts as a **security policy enforcement layer** on pull requests.
 
