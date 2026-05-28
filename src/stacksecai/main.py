@@ -16,7 +16,7 @@ from .semgrep_runner import run_semgrep
 def main():
     rules_path     = os.environ.get("SEMGREP_RULES", "rules/custom")
     target_path    = os.environ.get("TARGET_PATH", ".")
-    config_path    = os.environ.get("CONFIG_PATH", ".stacksecai.yml")  # ← 追加
+    config_path    = os.environ.get("CONFIG_PATH", ".vorsken.yml")
     block_on_error = os.environ.get("BLOCK_ON_ERROR", "true").lower() == "true"
 
     config = load_config(config_path)  # ← 追加

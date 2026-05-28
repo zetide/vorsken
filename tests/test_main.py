@@ -52,3 +52,25 @@ def test_main_writes_github_output(tmp_path):
         _run_main([], "LOW", "PASS", tmp_path=tmp_path)
     output = (tmp_path / "out.txt").read_text(encoding="utf-8")
     assert "verdict=PASS" in output
+
+
+def test_main_uses_vorsken_yml_when_config_path_unset(tmp_path):
+    env = {
+        "ANTHROPIC_API_KEY": "test-key",
+        "SEMGREP_RULES":     "rules/custom",
+        "TARGET_PATH":       ".",
+        "BLOCK_ON_ERROR":    "false",
+        "GITHUB_OUTPUT":     str(tmp_path / "out.txt"),
+        "GITHUB_TOKEN":      "test-token",
+        "GITHUB_REPOSITORY": "org/repo",
+        "PR_NUMBER":         "1",
+    }
+    with patch("stacksecai.main.run_semgrep",         return_value=[]), \
+         patch("stacksecai.main.analyze_with_claude", return_value=("LOW", "summary", [], [])), \
+         patch("stacksecai.main.post_pr_comment"), \
+         patch("stacksecai.main.load_config")         as mock_load_config, \
+         patch.dict("os.environ", env, clear=True):
+        mock_load_config.return_value = MagicMock()
+        with pytest.raises(SystemExit):
+            main()
+    mock_load_config.assert_called_once_with(".vorsken.yml")

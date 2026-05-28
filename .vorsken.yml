@@ -1,5 +1,5 @@
-﻿# StackSecAI Policy Gate configuration
-# https://rilvak.dev
+# vorsken Policy Gate configuration
+# https://github.com/zetide/vorsken
 
 policy:
   block_on: ["ERROR"]

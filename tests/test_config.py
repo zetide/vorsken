@@ -13,7 +13,7 @@ def test_default_config_when_no_file():
 
 
 def test_load_custom_config(tmp_path):
-    yml = tmp_path / ".stacksecai.yml"
+    yml = tmp_path / ".vorsken.yml"
     yml.write_text("""
 policy:
   block_on: ["ERROR", "WARNING"]
