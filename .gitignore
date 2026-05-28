@@ -10,3 +10,6 @@ fix_*.py
 __pycache__/
 .coverage
 src/*.egg-info/
+stacksecai_project_base.md
+.claude/
+claude-code-task-brief-*.md
