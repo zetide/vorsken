@@ -1,0 +1,67 @@
+rules:
+  - id: overpermissioned-agent-tool
+    languages: [python]
+    severity: ERROR
+    message: "LLM agent granted unrestricted code execution or file-system access. Sandbox or containerize execution tools and require human approval before running; scope FileManagementToolkit with root_dir and narrow selected_tools."
+    metadata:
+      category: security
+      ai_generated: true
+      owasp: "OWASP LLM Top 10 - LLM06:2025 Excessive Agency"
+      cwe: "CWE-269"
+      risk: "ShellTool / PythonREPLTool / PythonAstREPLTool give an LLM arbitrary shell or Python execution - a prompt injection then becomes remote code execution. FileManagementToolkit without root_dir grants read/write across the working directory; LangChain's own documentation notes there is no validation against prompt injection in that mode."
+      fix: "Sandbox or containerize execution tools and require human approval before running; scope FileManagementToolkit with root_dir and narrow selected_tools."
+      references:
+        - "https://docs.langchain.com/oss/python/integrations/tools/filesystem"
+        - "https://owasp.org/www-project-top-10-for-large-language-model-applications/"
+    patterns:
+      - pattern-either:
+          # --- ShellTool: instantiated after a LangChain ShellTool import ---
+          - patterns:
+              - pattern: ShellTool(...)
+              - pattern-either:
+                  - pattern-inside: |
+                      from langchain.tools import ShellTool
+                      ...
+                  - pattern-inside: |
+                      from langchain_community.tools import ShellTool
+                      ...
+                  - pattern-inside: |
+                      from langchain_community.tools.shell.tool import ShellTool
+                      ...
+          # --- PythonREPLTool: instantiated after a LangChain import ---
+          - patterns:
+              - pattern: PythonREPLTool(...)
+              - pattern-either:
+                  - pattern-inside: |
+                      from langchain.tools import PythonREPLTool
+                      ...
+                  - pattern-inside: |
+                      from langchain_experimental.tools import PythonREPLTool
+                      ...
+                  - pattern-inside: |
+                      from langchain_experimental.tools.python.tool import PythonREPLTool
+                      ...
+          # --- PythonAstREPLTool: instantiated after a LangChain import ---
+          - patterns:
+              - pattern: PythonAstREPLTool(...)
+              - pattern-either:
+                  - pattern-inside: |
+                      from langchain_experimental.tools import PythonAstREPLTool
+                      ...
+                  - pattern-inside: |
+                      from langchain_experimental.tools.python.tool import PythonAstREPLTool
+                      ...
+          # --- FileManagementToolkit instantiated without root_dir ---
+          - patterns:
+              - pattern: FileManagementToolkit(...)
+              - pattern-not: FileManagementToolkit(..., root_dir=$ROOT, ...)
+              - pattern-either:
+                  - pattern-inside: |
+                      from langchain_community.agent_toolkits import FileManagementToolkit
+                      ...
+                  - pattern-inside: |
+                      from langchain_community.agent_toolkits.file_management.toolkit import FileManagementToolkit
+                      ...
+                  - pattern-inside: |
+                      from langchain.agents.agent_toolkits import FileManagementToolkit
+                      ...

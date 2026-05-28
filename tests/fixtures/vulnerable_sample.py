@@ -116,3 +116,31 @@ def enrich_user_data(user_id: int) -> dict:
         "email": data["email"],
         "role":  data.get("role", "user"),
     }
+
+
+# ── AI-generated code risks ──────────────────────────────────────────────────
+# Patterns commonly produced by LLM coding assistants that hand excessive
+# capability to an LLM agent. Detected by rules under rules/custom/ai-generated/.
+
+# AI-GEN-1a: ShellTool given to an agent — arbitrary shell execution.
+from langchain_community.tools import ShellTool  # noqa: E402
+
+shell = ShellTool()
+
+# AI-GEN-1b: PythonREPLTool in an agent tool list — arbitrary Python execution.
+from langchain_experimental.tools import PythonREPLTool  # noqa: E402
+
+tools = [PythonREPLTool()]
+
+# AI-GEN-1c: FileManagementToolkit without root_dir — unrestricted FS access.
+from langchain_community.agent_toolkits import FileManagementToolkit  # noqa: E402
+
+fm = FileManagementToolkit()
+
+# AI-GEN-1d: PythonAstREPLTool — arbitrary Python execution.
+from langchain_experimental.tools import PythonAstREPLTool  # noqa: E402
+
+ast_tool = PythonAstREPLTool()
+
+# SAFE: FileManagementToolkit scoped with root_dir — must NOT fire.
+fm_safe = FileManagementToolkit(root_dir="/tmp/agent_workspace")
