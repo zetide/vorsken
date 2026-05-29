@@ -40,7 +40,7 @@ stacksecai-dev/                    # repo root (legacy name, kept stable)
 └── .vorsken.yml                   # user-facing config example
 ```
 
-**Ignore repo-root scratch files** (`*.ps1`, `fix_*.py`, `*_fixed.py`, `*_old.*`, `result.json`, `output/`). These are legacy scratch, not part of the Action, and are not referenced by `action.yml` or `pyproject.toml`.
+**Ignore repo-root scratch files** (`*.ps1`, `fix_*.py`, `*_fixed.py`, `*_old.*`, `output/`). These are legacy scratch, not part of the Action, and are not referenced by `action.yml` or `pyproject.toml`.
 
 ## Bash Commands
 
@@ -136,7 +136,7 @@ Any code that destructures this MUST handle exactly 4 values. Past production bu
 
 **YOU MUST:**
 
-1. Keep all 14 existing rules in `rules/custom/` (OWASP API Top10 + general). Do NOT deprecate or remove any.
+1. Keep all existing rules in `rules/custom/` (OWASP API Top10 + general). Do NOT deprecate or remove any.
 2. Preserve the `analyze_with_claude` 4-tuple return contract.
 3. Use `()` string concatenation for SYSTEM_PROMPT (never triple-quotes).
 4. Run `$env:PYTHONUTF8=1` before any pytest invocation on Windows.

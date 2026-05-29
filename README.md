@@ -2,10 +2,11 @@
 
 [![Latest Release](https://img.shields.io/github/v/release/zetide/vorsken)](https://github.com/zetide/vorsken/releases/latest)
 [![Marketplace](https://img.shields.io/badge/GitHub%20Marketplace-Vorsken%20Policy%20Gate-blue?logo=github)](https://github.com/marketplace/actions/vorsken-policy-gate)
-> Not a linter. Not a SAST dashboard.
-> A gate that blocks the merge — with AI context in plain English.
-> **Enforce API security policies on every PR — automatically.**
-> Semgrep detects vulnerabilities. Claude AI explains them in plain English. Your merge is blocked before bad code ships.
+> **The policy gate between AI-generated code and your main branch.**
+>
+> Works regardless of which AI tool generated the code (Cursor, Copilot, Aider, Claude Code, etc.), and regardless of which in-session security tools were active. vorsken enforces policy at merge time — complementing in-session guidance, not replacing it.
+
+Semgrep scans the diff. Claude explains each finding in plain English. The verdict — **BLOCK / FLAG / PASS** — is posted on the PR, and a `BLOCK` fails the required check and stops the merge.
 
 [![CI](https://github.com/zetide/vorsken/actions/workflows/ci.yml/badge.svg)](https://github.com/zetide/vorsken/actions/workflows/ci.yml)
 [![codecov](https://img.shields.io/badge/coverage-100%25-brightgreen)](https://github.com/zetide/vorsken)
@@ -63,7 +64,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - uses: zetide/vorsken@v0.2.5
+      - uses: zetide/vorsken@v0.2.6
         with:
           anthropic-api-key: ${{ secrets.ANTHROPIC_API_KEY }}
 ```
@@ -79,6 +80,32 @@ text
 ### 3. Open a pull request
 
 That's it. vorsken will automatically scan, analyze, and comment on every PR.
+
+---
+
+## Where vorsken Fits
+
+AI coding tools increasingly ship their own in-session security review — Anthropic's [security-guidance plugin](https://code.claude.com/docs/en/security-guidance), for one, flags risky patterns while Claude Code writes them. vorsken doesn't replace those tools. It runs one layer further down, at the merge gate.
+
+Anthropic describes AI-assisted security as defense in depth across four stages:
+
+| Stage | Typical tool | Role |
+| --- | --- | --- |
+| In session | In-editor review (e.g. the Claude Code security-guidance plugin) | Flags and fixes issues as the code is written |
+| On demand | `/security-review`-style scans | A one-off pass when a developer asks for it |
+| On pull request | Plan-gated multi-agent PR review | Correctness + security review with codebase context |
+| **In CI** | **Static analysis, dependency scanning, and policy enforcement** | **Hard gates on every change — whoever or whatever wrote it** |
+
+The in-session layers are guidance: they advise rather than block, and they only see code written through that one tool — not code from Cursor, Copilot, Aider, a teammate, or a human. Anthropic's own model leaves policy enforcement to the CI stage. That's where vorsken runs.
+
+vorsken is the **In CI** layer:
+
+- **Enforcing, not advisory** — a `BLOCK` verdict fails the required check and stops the merge.
+- **Tool- and plugin-agnostic** — it evaluates the diff, not the editor. Any AI tool, any IDE, or a human is gated the same way.
+- **Declarative policy** — `.vorsken.yml` defines what blocks, so the gate is auditable and version-controlled, not a setting in someone's editor.
+- **MIT, every plan** — no Team/Enterprise tier required.
+
+Use the in-session tools to catch issues early. Use vorsken so the ones that slip through never reach `main`.
 
 ---
 
