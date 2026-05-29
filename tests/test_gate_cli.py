@@ -3,7 +3,7 @@ import json
 import pytest
 from stacksecai.gate import main
 
-RESULT_JSON       = "result.json"
+RESULT_JSON       = "tests/fixtures/result.json"
 EMPTY_RESULT_JSON = "tests/fixtures/empty_result.json"
 
 def test_cli_block_with_severity_override():

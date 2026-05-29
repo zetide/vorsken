@@ -9,7 +9,7 @@ fix_*.py
 *_fixed.py
 *_old.*
 *.bak
-result.json
+/result.json
 output/
 
 # Local tooling
