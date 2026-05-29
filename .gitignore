@@ -1,15 +1,18 @@
-﻿
 # Python cache
 __pycache__/
 *.pyc
 .coverage
-
-# Temp scripts
-fix_*.py
-
-__pycache__/
-.coverage
 src/*.egg-info/
+
+# Scratch files (per CLAUDE.md)
+fix_*.py
+*_fixed.py
+*_old.*
+*.bak
+result.json
+output/
+
+# Local tooling
 stacksecai_project_base.md
 .claude/
 claude-code-task-brief-*.md
