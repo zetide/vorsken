@@ -1,5 +1,5 @@
 name: "vorsken Policy Gate"
-description: "Auto-comments API vulnerability findings on PRs using Semgrep + Claude AI"
+description: "The policy gate between AI-generated code and your main branch — Semgrep + Claude, enforced at merge time (BLOCK/FLAG/PASS)."
 author: "zetide"
 
 branding:
