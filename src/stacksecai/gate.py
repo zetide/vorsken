@@ -26,7 +26,7 @@ def load_findings(path: str) -> list:
 def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(
         prog="python -m stacksecai.gate",
-        description="Run StackSecAI Policy Gate on a Semgrep JSON result.",
+        description="Run vorsken Policy Gate on a Semgrep JSON result.",
     )
     parser.add_argument("result_json", help="Path to semgrep --json output file")
     parser.add_argument(

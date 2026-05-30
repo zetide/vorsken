@@ -1,6 +1,6 @@
 # tests/fixtures/vulnerable_sample.py
 """
-Vulnerable sample code for StackSecAI integration testing.
+Vulnerable sample code for vorsken integration testing.
 Each function demonstrates one OWASP API Security Top 10 (2023) risk.
 DO NOT deploy this code. For testing purposes only.
 """
