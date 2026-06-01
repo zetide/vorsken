@@ -1,8 +1,17 @@
 rules:
   - id: subprocess-shell-true
-    patterns:
+    pattern-either:
       - pattern: subprocess.run(..., shell=True, ...)
       - pattern: subprocess.Popen(..., shell=True, ...)
-    message: "shell=True with subprocess is a command injection risk."
+      - pattern: subprocess.call(..., shell=True, ...)
+      - pattern: subprocess.check_call(..., shell=True, ...)
+      - pattern: subprocess.check_output(..., shell=True, ...)
+    message: "subprocess called with shell=True runs the command through a shell, enabling OS command injection (CWE-78) when any argument is influenced by untrusted input. Pass arguments as a list and use shell=False; if a shell is required, never interpolate untrusted data into the command string."
     languages: [python]
     severity: ERROR
+    metadata:
+      category: security
+      owasp: "A03:2021 - Injection"
+      cwe: "CWE-78"
+      references:
+        - "https://cwe.mitre.org/data/definitions/78.html"
