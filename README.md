@@ -129,8 +129,8 @@ Create `.vorsken.yml` in your repository root to customize behavior:
 
 ```yaml
 policy:
-  block_on: ["CRITICAL", "HIGH"]
-  flag_on: ["MEDIUM"]
+  block_on: ["ERROR", "CRITICAL", "HIGH"]
+  flag_on: ["WARNING", "MEDIUM"]
 
 claude:
   model: "claude-haiku-4-5" # or claude-sonnet-4-5 for deeper analysis

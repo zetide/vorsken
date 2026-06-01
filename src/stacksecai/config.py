@@ -18,8 +18,8 @@ CLAUDE_TIMEOUT_WRITE:   float = 10.0   # リクエスト送信
 
 DEFAULT_CONFIG = {
     "policy": {
-        "block_on": ["ERROR"],
-        "flag_on":  ["WARNING"],
+        "block_on": ["ERROR", "CRITICAL", "HIGH"],
+        "flag_on":  ["WARNING", "MEDIUM"],
     },
     "claude": {
         "model":          "claude-haiku-4-5",
@@ -34,8 +34,8 @@ DEFAULT_CONFIG = {
 
 @dataclass
 class PolicyConfig:
-    block_on:        list[str] = field(default_factory=lambda: ["ERROR"])
-    flag_on:         list[str] = field(default_factory=lambda: ["WARNING"])
+    block_on:        list[str] = field(default_factory=lambda: ["ERROR", "CRITICAL", "HIGH"])
+    flag_on:         list[str] = field(default_factory=lambda: ["WARNING", "MEDIUM"])
     claude_model:    str       = "claude-haiku-4-5"
     severity_block:  list[str] = field(default_factory=lambda: ["CRITICAL", "HIGH"])
     severity_flag:   list[str] = field(default_factory=lambda: ["MEDIUM"])
@@ -61,8 +61,8 @@ def load_config(config_path: str = ".vorsken.yml") -> PolicyConfig:
     }
 
     return PolicyConfig(
-        block_on       = [s.upper() for s in policy.get("block_on", ["ERROR"])],
-        flag_on        = [s.upper() for s in policy.get("flag_on",  ["WARNING"])],
+        block_on       = [s.upper() for s in policy.get("block_on", ["ERROR", "CRITICAL", "HIGH"])],
+        flag_on        = [s.upper() for s in policy.get("flag_on",  ["WARNING", "MEDIUM"])],
         claude_model   = claude.get("model", "claude-haiku-4-5"),
         severity_block = [s.upper() for s in claude.get("severity_block", ["CRITICAL", "HIGH"])],
         severity_flag  = [s.upper() for s in claude.get("severity_flag",  ["MEDIUM"])],
