@@ -2,8 +2,8 @@
 # https://github.com/zetide/vorsken
 
 policy:
-  block_on: ["ERROR"]
-  flag_on:  ["WARNING"]
+  block_on: ["ERROR", "CRITICAL", "HIGH"]
+  flag_on:  ["WARNING", "MEDIUM"]
 
 claude:
   model: "claude-haiku-4-5"

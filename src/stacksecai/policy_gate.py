@@ -36,11 +36,14 @@ def compute_verdict(
     sev = claude_severity.upper()
 
     # 1. Semgrep severity → BLOCK
+    # Compare case-insensitively: finding severities and the configured
+    # block_on / flag_on sets are both normalized to uppercase so that
+    # notation variants (e.g. "High") match "HIGH".
     semgrep_severities = {
         f.get("extra", {}).get("severity", "").upper()
         for f in findings
     }
-    if semgrep_severities & set(config.block_on):
+    if semgrep_severities & {s.upper() for s in config.block_on}:
         return "BLOCK"
 
     # 2. Claude severity → BLOCK
@@ -53,7 +56,7 @@ def compute_verdict(
         return "BLOCK"
 
     # 4. FLAG checks
-    if semgrep_severities & set(config.flag_on):
+    if semgrep_severities & {s.upper() for s in config.flag_on}:
         return "FLAG"
     if sev in config.severity_flag:
         return "FLAG"

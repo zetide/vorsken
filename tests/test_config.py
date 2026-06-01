@@ -5,8 +5,8 @@ from stacksecai.config import load_config, PolicyConfig
 
 def test_default_config_when_no_file():
     cfg = load_config("nonexistent.yml")
-    assert cfg.block_on       == ["ERROR"]
-    assert cfg.flag_on        == ["WARNING"]
+    assert cfg.block_on       == ["ERROR", "CRITICAL", "HIGH"]
+    assert cfg.flag_on        == ["WARNING", "MEDIUM"]
     assert cfg.severity_block == ["CRITICAL", "HIGH"]
     assert cfg.severity_flag  == ["MEDIUM"]
     assert cfg.rule_overrides == {}
