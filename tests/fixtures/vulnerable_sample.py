@@ -39,6 +39,7 @@ def get_user_profile(user_id: int, db) -> dict:
 # No rate limiting, pagination cap, or resource guard on the query.
 
 def search_items(keyword: str, db) -> list:
+    # SQLI-VULN-FSTRING: f-string SQL (existing sample; sql-injection must fire)
     rows = db.execute(
         f"SELECT * FROM items WHERE name LIKE '%{keyword}%'"
     ).fetchall()
@@ -144,3 +145,41 @@ ast_tool = PythonAstREPLTool()
 
 # SAFE: FileManagementToolkit scoped with root_dir — must NOT fire.
 fm_safe = FileManagementToolkit(root_dir="/tmp/agent_workspace")
+
+
+# ── SQL Injection (CWE-89) - sql-injection rule fixtures ─────────────────────
+# SQL passed to execute()/executemany() as a dynamically constructed string.
+# The sql-injection rule (rules/custom/sql_injection.yml) MUST fire on the
+# VULN cases and MUST NOT fire on the SAFE (parameterized / static) cases.
+# The f-string form is exercised by search_items above (SQLI-VULN-FSTRING).
+
+
+def sqli_concat(user_id, db):
+    # SQLI-VULN-CONCAT: query built by string concatenation
+    return db.execute("SELECT * FROM accounts WHERE id = " + user_id).fetchone()
+
+
+def sqli_format(table, db):
+    # SQLI-VULN-FORMAT: query built with str.format()
+    return db.execute("SELECT * FROM {}".format(table)).fetchall()
+
+
+def sqli_percent(name, db):
+    # SQLI-VULN-PERCENT: query built with single-% formatting
+    return db.execute("SELECT * FROM users WHERE name = '%s'" % name).fetchone()
+
+
+def sqli_safe_param(user_id, db):
+    # SQLI-SAFE-PARAM: parameterized query, value bound as the second argument
+    query = "SELECT * FROM accounts WHERE id = ?"
+    return db.execute(query, (user_id,)).fetchone()
+
+
+def sqli_safe_placeholder(user_id, db):
+    # SQLI-SAFE-PLACEHOLDER: %s is a bound placeholder, not % formatting
+    return db.execute("SELECT * FROM accounts WHERE id = %s", (user_id,)).fetchone()
+
+
+def sqli_safe_static(db):
+    # SQLI-SAFE-STATIC: fully static query, no interpolation
+    return db.execute("SELECT COUNT(*) FROM accounts").fetchone()

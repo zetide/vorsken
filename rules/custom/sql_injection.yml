@@ -1,0 +1,21 @@
+rules:
+  - id: sql-injection
+    patterns:
+      - pattern-either:
+          - pattern: $CURSOR.$METHOD(f"...{$X}...")
+          - pattern: $CURSOR.$METHOD("..." + $X)
+          - pattern: $CURSOR.$METHOD($X + "...")
+          - pattern: $CURSOR.$METHOD("..." % $X)
+          - pattern: $CURSOR.$METHOD($STR.format(...))
+      - metavariable-regex:
+          metavariable: $METHOD
+          regex: ^(execute|executemany)$
+    message: "SQL statement built from a dynamically constructed string (f-string, concatenation, str.format(), or % formatting) and passed to execute()/executemany(). When any interpolated value is influenced by untrusted input this enables SQL injection (CWE-89). Use parameterized queries: pass the statement with placeholders and bind the values as the second argument (for example a %s or ? placeholder with a params tuple) instead of interpolating untrusted data into the query string."
+    languages: [python]
+    severity: ERROR
+    metadata:
+      category: security
+      owasp: "A03:2021 - Injection"
+      cwe: "CWE-89"
+      references:
+        - "https://cwe.mitre.org/data/definitions/89.html"
