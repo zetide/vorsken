@@ -164,7 +164,7 @@ rules:
 
 | #     | Risk                                            | Rule File                                          | Status |
 | ----- | ----------------------------------------------- | -------------------------------------------------- | ------ |
-| API1  | Broken Object Level Authorization               | `api1_bola.yml`                                    | ✅     |
+| API1  | Broken Object Level Authorization               | — (no dedicated rule)                              | —      |
 | API2  | Broken Authentication                           | `api2_broken_auth.yml`                             | ✅     |
 | API3  | Broken Object Property Level Authorization      | `api3_mass_assignment.yml`                         | ✅     |
 | API4  | Unrestricted Resource Consumption               | `api4_resource_limit.yml`                          | ✅     |
@@ -174,6 +174,24 @@ rules:
 | API8  | Security Misconfiguration                       | `api8_debug_mode.yml`, `api8_hardcoded_secret.yml` | ✅     |
 | API9  | Improper Inventory Management                   | `api9_inventory.yml`                               | ✅     |
 | API10 | Unsafe Consumption of APIs                      | `api10_unsafe_api.yml`                             | ✅     |
+
+> **API1 — Broken Object Level Authorization (BOLA):** no dedicated rule. Object-level authorization is contextual — it depends on which user owns the record being accessed — so a pure-policy Semgrep pattern produces too many false positives to gate on; BOLA is left to Claude's contextual review instead. The f-string SQL pattern that the former API1 rule incidentally matched has been relabeled and moved into the generic `sql-injection` rule (CWE-89) — see [Additional Hardening Rules](#additional-hardening-rules).
+>
+> **API7 — SSRF:** `ssrf-via-requests` is `severity: WARNING`, so it maps to **FLAG**, not BLOCK. It is a coarse gate that routes outbound `requests` calls to human review: a pure-policy rule cannot distinguish a validated or allowlisted URL from a dangerous one, so it deliberately flags for a human rather than blocking the merge.
+
+---
+
+## Additional Hardening Rules
+
+Beyond the OWASP API Top 10, `rules/custom` ships general hardening rules that carry **no OWASP API number**. Most map to the A03:2021 - Injection family and run against all scanned Python. `severity` maps to the policy gate verdict (`ERROR` → BLOCK, `WARNING` → FLAG).
+
+| Rule ID                 | Detects                                                                                  | Rule File                  | CWE              | Severity → Verdict |
+| ----------------------- | ---------------------------------------------------------------------------------------- | -------------------------- | ---------------- | ------------------ |
+| `sql-injection`         | Dynamic SQL (f-string, `+`, `%`, or `.format()`) passed to `execute()` / `executemany()` | `sql_injection.yml`        | CWE-89           | `ERROR` → BLOCK    |
+| `subprocess-shell-true` | `subprocess.run` / `Popen` / `call` / `check_call` / `check_output` with `shell=True`    | `subprocess_injection.yml` | CWE-78           | `ERROR` → BLOCK    |
+| `code-execution`        | `exec()`, `compile()`, `pickle.load()`, `pickle.loads()`                                 | `code_execution.yml`       | CWE-94 / CWE-502 | `ERROR` → BLOCK    |
+| `eval-injection`        | `eval(...)`                                                                               | `eval_injection.yml`       | —                | `ERROR` → BLOCK    |
+| `hardcoded-password`    | Hardcoded `password` / `secret` / `api_key` literal                                      | `hardcoded_password.yml`   | —                | `ERROR` → BLOCK    |
 
 ---
 

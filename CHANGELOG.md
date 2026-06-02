@@ -21,6 +21,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `.stacksecai.yml` config file support for policy customization
 - `outputs.verdict` exposed via `$GITHUB_OUTPUT` for downstream workflow steps
 - `branding` (shield / red) in `action.yml` for GitHub Marketplace
+- `sql-injection` rule: flags SQL built from a dynamically constructed string (f-string, concatenation, `str.format()`, or `%` formatting) and passed to `execute()` / `executemany()` (`ERROR`, CWE-89)
+- `code-execution` rule: blocks `exec()`, `compile()`, `pickle.load()`, and `pickle.loads()` (`ERROR`, CWE-94 / CWE-502)
+- `dangerous-ai-kwargs` rule: blocks `trust_remote_code=True`, `allow_dangerous_code=True`, and `allow_dangerous_deserialization=True` on any call (`ERROR`, OWASP LLM Top 10 / LLM06)
 
 ### Changed
 
@@ -28,6 +31,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `semgrep-rules` input default changed to `${{ github.action_path }}/rules/custom`
 - Author unified to `vorsken` across `action.yml` and README
 - All commits, issues, and PR operations switched to English
+- Default policy `block_on` / `flag_on` widened to recognize OWASP severities: `block_on` is now `[ERROR, CRITICAL, HIGH]` and `flag_on` `[WARNING, MEDIUM]`, with case-insensitive comparison, so HIGH/CRITICAL Semgrep findings BLOCK on their own instead of falling through to PASS
+- `subprocess-shell-true` rewritten as `pattern-either` covering `subprocess.run` / `Popen` / `call` / `check_call` / `check_output` with `shell=True`, restoring OS command-injection detection (`ERROR`, CWE-78)
+- Replaced the dedicated `api1_bola.yml` rule: its f-string SQL pattern was relabeled and moved into the generic `sql-injection` rule (BOLA / CWE-639 → SQL injection / CWE-89); API1 (BOLA) now has no dedicated Semgrep rule and is left to Claude's contextual review
 
 ### Fixed
 
