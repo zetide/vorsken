@@ -1,0 +1,19 @@
+rules:
+  - id: code-execution
+    pattern-either:
+      - pattern: exec(...)
+      - pattern: pickle.loads(...)
+      - pattern: pickle.load(...)
+      - pattern: compile(...)
+    message: "Dynamic code execution or untrusted deserialization via exec(), compile(), pickle.load(), or pickle.loads(). exec() and compile() run arbitrary Python (CWE-94); pickle.load()/loads() deserialize untrusted data into arbitrary objects (CWE-502) - both enable remote code execution. Do not execute or compile dynamically built source, and deserialize only trusted data using a safe format such as JSON."
+    languages: [python]
+    severity: ERROR
+    metadata:
+      category: security
+      owasp: "A03:2021 - Injection"
+      cwe:
+        - "CWE-94: Improper Control of Generation of Code ('Code Injection')"
+        - "CWE-502: Deserialization of Untrusted Data"
+      references:
+        - "https://cwe.mitre.org/data/definitions/94.html"
+        - "https://cwe.mitre.org/data/definitions/502.html"

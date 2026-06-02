@@ -183,3 +183,71 @@ def sqli_safe_placeholder(user_id, db):
 def sqli_safe_static(db):
     # SQLI-SAFE-STATIC: fully static query, no interpolation
     return db.execute("SELECT COUNT(*) FROM accounts").fetchone()
+
+
+# ── Dangerous AI/ML library kwargs (CWE-94 / CWE-502) ────────────────────────
+# Opt-in flags that enable code execution or unsafe deserialization in AI/ML
+# libraries. The dangerous-ai-kwargs rule MUST fire when the flag is literally
+# True and MUST NOT fire when it is False or omitted.
+
+
+def ai_trust_remote_code(loader):
+    # AIKW-VULN-TRUST: trust_remote_code=True runs arbitrary model-repo code
+    return loader.from_pretrained("some/model", trust_remote_code=True)
+
+
+def ai_dangerous_deserialization(store, embeddings):
+    # AIKW-VULN-DESER: allow_dangerous_deserialization=True permits pickle RCE
+    return store.load_local("index", embeddings, allow_dangerous_deserialization=True)
+
+
+def ai_dangerous_code(make_agent, llm, df):
+    # AIKW-VULN-CODE: allow_dangerous_code=True permits arbitrary code execution
+    return make_agent(llm, df, allow_dangerous_code=True)
+
+
+def ai_kwargs_false(loader):
+    # AIKW-SAFE-FALSE: explicit =False must NOT fire
+    return loader.from_pretrained("some/model", trust_remote_code=False)
+
+
+def ai_kwargs_omitted(loader):
+    # AIKW-SAFE-OMITTED: flag not passed must NOT fire
+    return loader.from_pretrained("some/model")
+
+
+# ── Dynamic code execution / deserialization (CWE-94 / CWE-502) ──────────────
+# The code-execution rule MUST fire on exec / compile / pickle.load(s) and MUST
+# NOT fire on re.compile (regex) or ordinary code.
+import pickle  # noqa: E402
+import re  # noqa: E402
+
+
+def ce_exec(user_code):
+    # CE-VULN-EXEC: exec() runs arbitrary Python
+    exec(user_code)
+
+
+def ce_pickle_loads(blob):
+    # CE-VULN-PICKLE-LOADS: pickle.loads() deserializes untrusted bytes
+    return pickle.loads(blob)
+
+
+def ce_pickle_load(fp):
+    # CE-VULN-PICKLE-LOAD: pickle.load() deserializes an untrusted stream
+    return pickle.load(fp)
+
+
+def ce_compile(src):
+    # CE-VULN-COMPILE: builtin compile() turns a string into executable code
+    return compile(src, "<string>", "exec")
+
+
+def ce_re_compile(pattern):
+    # CE-SAFE-RE-COMPILE: re.compile is a regex, NOT builtin compile - must NOT fire
+    return re.compile(pattern)
+
+
+def ce_normal(values):
+    # CE-SAFE-NORMAL: ordinary code must NOT fire
+    return sum(v for v in values)
