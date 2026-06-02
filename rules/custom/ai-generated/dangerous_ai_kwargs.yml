@@ -1,0 +1,22 @@
+rules:
+  - id: dangerous-ai-kwargs
+    languages: [python]
+    severity: ERROR
+    message: "AI/ML library call enables a dangerous capability. trust_remote_code=True and allow_dangerous_code=True execute arbitrary Python from a model repository or agent (CWE-94); allow_dangerous_deserialization=True permits pickle deserialization of untrusted data (CWE-502). A prompt injection or a malicious model/index then becomes remote code execution. Drop the flag (it defaults to False), load only pinned and vetted sources, and sandbox any execution."
+    metadata:
+      category: security
+      ai_generated: true
+      owasp: "OWASP LLM Top 10 - LLM06:2025 Excessive Agency"
+      cwe:
+        - "CWE-94: Improper Control of Generation of Code (trust_remote_code / allow_dangerous_code)"
+        - "CWE-502: Deserialization of Untrusted Data (allow_dangerous_deserialization)"
+      risk: "AI/ML libraries gate code execution and unsafe deserialization behind opt-in flags. trust_remote_code (Hugging Face), allow_dangerous_code (LangChain agents), and allow_dangerous_deserialization (LangChain vector stores) each turn an untrusted model, index, or prompt into arbitrary code execution."
+      fix: "Leave the flag at its default of False; load only pinned, vetted sources; and sandbox or containerize any code execution."
+      references:
+        - "https://owasp.org/www-project-top-10-for-large-language-model-applications/"
+        - "https://cwe.mitre.org/data/definitions/94.html"
+        - "https://cwe.mitre.org/data/definitions/502.html"
+    pattern-either:
+      - pattern: $FUNC(..., trust_remote_code=True, ...)
+      - pattern: $FUNC(..., allow_dangerous_deserialization=True, ...)
+      - pattern: $FUNC(..., allow_dangerous_code=True, ...)
