@@ -27,13 +27,13 @@ Semgrep scans the diff. Claude explains each finding in plain English. The verdi
 
 vorsken is a GitHub Action that acts as a **security policy enforcement layer** on pull requests.
 
+```text
 PR opened / updated
 └─▶ Semgrep scans changed files with OWASP API Top10 rules
 └─▶ Claude AI analyzes findings and generates an English report
 └─▶ Verdict posted as a PR comment: BLOCK / FLAG / PASS
 └─▶ BLOCK verdict fails the required check → merge is prevented
-
-text
+```
 
 **Why this, not just Semgrep alone?**
 Semgrep gives you rule IDs and line numbers. vorsken adds Claude AI context:
@@ -64,7 +64,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - uses: zetide/vorsken@v0.2.6
+      - uses: zetide/vorsken@v0.3.0
         with:
           anthropic-api-key: ${{ secrets.ANTHROPIC_API_KEY }}
 ```
@@ -73,9 +73,9 @@ jobs:
 
 Go to **Settings → Secrets and variables → Actions** and add:
 
+```text
 ANTHROPIC_API_KEY = sk-ant-...
-
-text
+```
 
 ### 3. Open a pull request
 
@@ -111,6 +111,7 @@ Use the in-session tools to catch issues early. Use vorsken so the ones that sli
 
 ## PR Comment Example
 
+```text
 🚨 vorsken Policy Gate — BLOCK
 
 Summary: A hardcoded API key and an SSRF vulnerability were detected.
@@ -118,8 +119,7 @@ Merge is blocked until these issues are resolved.
 Severity Rule OWASP Category Recommendation
 🔴 HIGH hardcoded-api-key API8:2023 Security Misconfiguration Move credentials to environment variables.
 🔴 HIGH ssrf-requests API7:2023 SSRF Validate and allowlist external URLs before requests.
-
-text
+```
 
 ---
 
