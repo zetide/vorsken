@@ -1,5 +1,11 @@
 # vorsken
 
+## Project Status
+
+vorsken is currently in maintenance mode.
+
+This repository remains available as an OSS experiment for AI-generated code security policy gates using Semgrep and Claude. No active roadmap is currently planned, but the code, rules, and related research notes are kept for reference and possible future reuse.
+
 [![Latest Release](https://img.shields.io/github/v/release/zetide/vorsken)](https://github.com/zetide/vorsken/releases/latest)
 [![Marketplace](https://img.shields.io/badge/GitHub%20Marketplace-Vorsken%20Policy%20Gate-blue?logo=github)](https://github.com/marketplace/actions/vorsken-policy-gate)
 > **The policy gate between AI-generated code and your main branch.**
